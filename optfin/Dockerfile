@@ -1,6 +1,6 @@
-FROM python:3.13.7-slim-bookworm
+FROM python:3.13-slim-bookworm
 
-SHELL["/bin/bash", "-c"]
+SHELL ["/bin/bash", "-c"]
 
 RUN mkdir codefile
 WORKDIR codefile
