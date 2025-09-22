@@ -33,6 +33,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'registration',
+    'cryptocurrencies',
+    'exchanges',
+    'modelsMark',
+    'news',
+    'portfolioinclus',
+    'portfolios',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
