@@ -1,4 +1,5 @@
 from django.db import models
+from cryptocurrencies.models import CryptoCoin
 
 class OHLCV(models.Model):
     id = models.AutoField(primary_key=True)
