@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'exchanges',
     'modelsMark',
     'news',
-    'portfolioinclus',
+    'portfolioInclus',
     'portfolios',
     'django.contrib.admin',
     'django.contrib.auth',
