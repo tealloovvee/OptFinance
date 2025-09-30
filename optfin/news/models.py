@@ -1,4 +1,5 @@
 from django.db import models
+from registration.models import User
 
 class News(models.Model):
     id = models.AutoField(primary_key=True)
@@ -6,6 +7,7 @@ class News(models.Model):
     content = models.TextField()
     published_at = models.DateTimeField()
     photo = models.BinaryField(null=True, blank=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
