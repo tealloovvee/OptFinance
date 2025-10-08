@@ -29,6 +29,9 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
+TELEGRAM_BOT_TOKEN = "8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw"
+ADMIN_CHAT_ID = 123456789
+
 
 # Application definition
 
