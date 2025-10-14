@@ -1,10 +1,8 @@
-version: '3.9'
 
 services:
   web:
     build: .
     container_name: django_app
-    command: gunicorn optfin.wsgi:application -b 0.0.0.0:8000
     volumes:
       - .:/codefile
     env_file:
@@ -19,9 +17,9 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: mydatabaseuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: optfindb
+      POSTGRES_USER: Nephilim
+      POSTGRES_PASSWORD: project7162wkfgmk
     ports:
       - "5432:5432"
     volumes:
