@@ -32,6 +32,10 @@ ALLOWED_HOSTS = []
 TELEGRAM_BOT_TOKEN = "8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw"
 ADMIN_CHAT_ID = 123456789
 
+JWT_SECRET_KEY = env('JWT_SECRET_KEY', default='your-secret-key-change-in-production')
+JWT_ALGORITHM = 'HS256'
+JWT_ACCESS_TOKEN_LIFETIME = 3600
+JWT_REFRESH_TOKEN_LIFETIME = 604800
 
 # Application definition
 
@@ -86,7 +90,7 @@ ROOT_URLCONF = 'MainProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -152,6 +156,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'templates', 'dist', 'assets'),
+    os.path.join(BASE_DIR, 'templates'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
