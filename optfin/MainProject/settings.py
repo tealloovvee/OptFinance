@@ -27,7 +27,10 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "192.168.100.7",
+]
 
 TELEGRAM_BOT_TOKEN = "8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw"
 ADMIN_CHAT_ID = 123456789
@@ -37,9 +40,9 @@ JWT_ALGORITHM = 'HS256'
 JWT_ACCESS_TOKEN_LIFETIME = 3600
 JWT_REFRESH_TOKEN_LIFETIME = 604800
 
-# Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'registration',
     'cryptocurrencies',
     'exchanges',
@@ -76,6 +79,7 @@ LOGGING = {
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -90,7 +94,7 @@ ROOT_URLCONF = 'MainProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -150,17 +154,24 @@ USE_I18N = True
 
 USE_TZ = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React dev server
+    "http://127.0.0.1:3000",
+    # Add your frontend production URL here
+    # "https://your-frontend-domain.com",
+]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'templates', 'dist', 'assets'),
-    os.path.join(BASE_DIR, 'templates'),
-]
+STATICFILES_DIRS = []
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
