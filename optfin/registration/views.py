@@ -11,39 +11,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@require_http_methods(["POST"])
-def create_user(request):
-    data = request.POST
-    login = data.get('login')
-    email = data.get('email')
-    password = data.get('password')
-
-    if not login or not email or not password:
-        logger.warning("Create user failed: missing required fields")
-        return JsonResponse({"error": "Missing required fields"}, status=400)
-
-    password_hash = make_password(password)
-
-    try:
-        user = User.objects.create(
-            login=login,
-            email=email,
-            password_hash=password_hash
-        )
-        logger.info(f"User created: {user.login}")
-        return JsonResponse({
-            "id": user.id,
-            "login": user.login,
-            "email": user.email,
-            "role": user.role,
-            "portfolios_created": user.portfolios_created,
-            "created_at": user.created_at.isoformat()
-        })
-    except Exception as e:
-        logger.error(f"Error creating user: {e}")
-        return JsonResponse({"error": "Failed to create user"}, status=500)
-
-
 @require_http_methods(["GET"])
 def get_user(request, user_id):
     try:
