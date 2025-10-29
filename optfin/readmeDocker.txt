@@ -30,3 +30,9 @@ docker-compose up -d      # запускает в фоновом режиме
 
 Больше информации можно узнать командой docker в консоль с установленным докером
 http://localhost:8000
+
+docker exec -it django_app python manage.py makemigrations
+docker exec -it django_app python manage.py migrate
+
+docker exec -it django_app python manage.py test registration
+
