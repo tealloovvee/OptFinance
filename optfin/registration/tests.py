@@ -1,8 +1,14 @@
 import json
+import logging
 from django.test import TestCase
 from rest_framework.test import APIClient
 from registration.models import User
 from django.contrib.auth.hashers import make_password
+
+logger = logging.getLogger(__name__)
+logger.debug("Debug message")
+logger.info("Info message")
+logger.error("Error message")
 
 class UserAPITests(TestCase):
     def setUp(self):
