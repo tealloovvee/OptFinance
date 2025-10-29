@@ -9,24 +9,25 @@ def generate_tokens(user):
     """
     Генерирует access и refresh токены для пользователя
     """
-    payload = {
+    now = datetime.datetime.utcnow()
+    access_payload = {
         'user_id': user.id,
         'login': user.login,
         'email': user.email,
         'role': user.role,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=settings.JWT_ACCESS_TOKEN_LIFETIME),
-        'iat': datetime.datetime.utcnow(),
+        'exp': now + datetime.timedelta(seconds=settings.JWT_ACCESS_TOKEN_LIFETIME),
+        'iat': now,
         'type': 'access'
     }
 
     refresh_payload = {
         'user_id': user.id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=settings.JWT_REFRESH_TOKEN_LIFETIME),
-        'iat': datetime.datetime.utcnow(),
+        'exp': now + datetime.timedelta(seconds=settings.JWT_REFRESH_TOKEN_LIFETIME),
+        'iat': now,
         'type': 'refresh'
     }
 
-    access_token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    access_token = jwt.encode(access_payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     refresh_token = jwt.encode(refresh_payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
     return {
@@ -39,20 +40,18 @@ def generate_tokens(user):
 
 def verify_token(token):
     """
-    Проверяет JWT токен и возвращает данные пользователя
+    Проверяет JWT токен и возвращает payload
     """
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         return payload
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
 
 
 def authenticate_user(login_or_email, password):
     """
-    Аутентифицирует пользователя по логину/email и паролю
+    Аутентифицирует пользователя по логину или email и паролю
     """
     try:
         user = User.objects.get(login=login_or_email)
@@ -69,7 +68,7 @@ def authenticate_user(login_or_email, password):
 
 def get_user_from_token(token):
     """
-    Получает пользователя из JWT токена
+    Получает пользователя из access JWT токена
     """
     payload = verify_token(token)
     if not payload or payload.get('type') != 'access':

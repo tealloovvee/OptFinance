@@ -42,6 +42,7 @@ JWT_REFRESH_TOKEN_LIFETIME = 604800
 
 
 INSTALLED_APPS = [
+    'rest_framework',
     'corsheaders',
     'registration',
     'cryptocurrencies',

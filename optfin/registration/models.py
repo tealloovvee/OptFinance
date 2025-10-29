@@ -8,6 +8,7 @@ class User(models.Model):
     password_hash = models.CharField(max_length=255)
     portfolios_created = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
+    refresh_token = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return self.login
