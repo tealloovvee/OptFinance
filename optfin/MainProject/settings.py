@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import environ
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,20 +60,58 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+class SingleLevelFilter(logging.Filter):
+    def __init__(self, level):
+        self.level = level
+        super().__init__()
+
+    def filter(self, record):
+        return record.levelno == self.level
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'detailed': {
+            'format': '{asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'debug_filter': {'()': SingleLevelFilter, 'level': logging.DEBUG},
+        'info_filter': {'()': SingleLevelFilter, 'level': logging.INFO},
+        'error_filter': {'()': SingleLevelFilter, 'level': logging.ERROR},
+    },
     'handlers': {
-        'file': {
+        'debug_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'debug.log'),
+            'formatter': 'detailed',
+            'filters': ['debug_filter'],
+        },
+        'info_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'logs/app.log',
+            'filename': os.path.join(LOG_DIR, 'info.log'),
+            'formatter': 'detailed',
+            'filters': ['info_filter'],
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'error.log'),
+            'formatter': 'detailed',
+            'filters': ['error_filter'],
         },
     },
     'loggers': {
         '': {
-            'handlers': ['file'],
-            'level': 'INFO',
+            'handlers': ['debug_file', 'info_file', 'error_file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     },

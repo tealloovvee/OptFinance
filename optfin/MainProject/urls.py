@@ -8,6 +8,9 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration/', include('registration.urls')),
+    path('news/', include('news.urls')),
+    path('cryptocurrencies/', include('cryptocurrencies.urls')),
+    path('exchanges/', include('exchanges.urls')),
     path('', TemplateView.as_view(template_name='dist/index.html')),
 ]
 

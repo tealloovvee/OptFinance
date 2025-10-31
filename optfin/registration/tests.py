@@ -1,71 +1,100 @@
 import json
-from django.test import TestCase
+import pytest
 from rest_framework.test import APIClient
 from registration.models import User
 from django.contrib.auth.hashers import make_password
 
-class UserAPITests(TestCase):
-    def setUp(self):
-        self.client = APIClient()
 
-    def test_register_user(self):
-        """Тест регистрации нового пользователя"""
-        payload = {"login": "testuser", "email": "test@example.com", "password": "123456"}
-        response = self.client.post(
-            '/registration/auth/register/',
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_data = response.json()
-        self.assertIn("tokens", json_data)
-        self.assertIn("access_token", json_data["tokens"])
-        self.assertIn("refresh_token", json_data["tokens"])
-        self.assertEqual(User.objects.count(), 1)
-        user = User.objects.first()
-        self.assertEqual(user.login, "testuser")
-        self.assertEqual(user.portfolios_created, {})
+@pytest.fixture
+def client():
+    return APIClient()
 
-    def test_login_user(self):
-        """Тест логина существующего пользователя"""
-        user = User.objects.create(
-            login="testuser",
-            email="test@example.com",
-            password_hash=make_password("123456")
-        )
-        payload = {"login": "testuser", "password": "123456"}
-        response = self.client.post(
-            "/registration/auth/login/",
-            data=json.dumps(payload),
-            content_type='application/json'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_data = response.json()
-        self.assertIn("tokens", json_data)
-        self.assertIn("access_token", json_data["tokens"])
-        self.assertIn("refresh_token", json_data["tokens"])
-        self.assertEqual(json_data["user"]["login"], "testuser")
-        self.assertEqual(json_data["user"]["portfolios_created"], {})
 
-    def test_get_profile_requires_auth(self):
-        """Тест получения профиля с JWT авторизацией"""
-        user = User.objects.create(
-            login="testuser",
-            email="test@example.com",
-            password_hash=make_password("123456")
-        )
-        # логинимся, чтобы получить токен
-        login_resp = self.client.post(
-            "/registration/auth/login/",
-            data=json.dumps({"login": "testuser", "password": "123456"}),
-            content_type='application/json'
-        )
-        self.assertEqual(login_resp.status_code, 200, login_resp.content)
-        token = login_resp.json()["tokens"]["access_token"]  # исправлено
+@pytest.mark.parametrize(
+    "payload,expected_login,expected_email",
+    [
+        ({"login": "user1", "email": "u1@example.com", "password": "123456"}, "user1", "u1@example.com"),
+        ({"login": "user2", "email": "u2@example.com", "password": "abcdef"}, "user2", "u2@example.com"),
+    ],
+)
+@pytest.mark.django_db
+def test_register_user(client, payload, expected_login, expected_email):
+    """Параметризованный тест регистрации"""
+    response = client.post(
+        "/registration/auth/register/",
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
 
-        # авторизация с токеном
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
-        resp = self.client.get("/registration/auth/profile/")
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json()["login"], "testuser")
-        self.assertEqual(resp.json()["portfolios_created"], {})
+    assert response.status_code == 200
+    json_data = response.json()
+    assert "tokens" in json_data
+    assert "access_token" in json_data["tokens"]
+    assert "refresh_token" in json_data["tokens"]
+
+    user = User.objects.get(login=expected_login)
+    assert user.email == expected_email
+    assert user.portfolios_created == {}
+
+
+@pytest.mark.parametrize(
+    "login,password",
+    [
+        ("loginA", "pass123"),
+        ("loginB", "abcdef"),
+    ],
+)
+@pytest.mark.django_db
+def test_login_user(client, login, password):
+    """Параметризованный тест логина"""
+    User.objects.create(
+        login=login,
+        email=f"{login}@example.com",
+        password_hash=make_password(password),
+    )
+
+    payload = {"login": login, "password": password}
+    response = client.post(
+        "/registration/auth/login/",
+        data=json.dumps(payload),
+        content_type="application/json"
+    )
+
+    assert response.status_code == 200
+    json_data = response.json()
+    assert "tokens" in json_data
+    assert "access_token" in json_data["tokens"]
+    assert "refresh_token" in json_data["tokens"]
+    assert json_data["user"]["login"] == login
+
+
+@pytest.mark.parametrize(
+    "login,password",
+    [
+        ("profileA", "111111"),
+        ("profileB", "222222"),
+    ],
+)
+@pytest.mark.django_db
+def test_get_profile_requires_auth(client, login, password):
+    """Параметризованный тест получения профиля"""
+    User.objects.create(
+        login=login,
+        email=f"{login}@example.com",
+        password_hash=make_password(password)
+    )
+
+    login_resp = client.post(
+        "/registration/auth/login/",
+        data=json.dumps({"login": login, "password": password}),
+        content_type="application/json"
+    )
+
+    assert login_resp.status_code == 200
+    token = login_resp.json()["tokens"]["access_token"]
+
+    client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+    resp = client.get("/registration/auth/profile/")
+    assert resp.status_code == 200
+    assert resp.json()["login"] == login
+    assert resp.json()["portfolios_created"] == {}

@@ -10,7 +10,9 @@ import json
 import logging
 
 logger = logging.getLogger(__name__)
-
+logger.debug("Debug message")
+logger.info("Info message")
+logger.error("Error message")
 
 @require_http_methods(["GET"])
 def get_user(request, user_id):
