@@ -1,13 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from registration.models import User
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
 from .jwt_utils import generate_tokens, authenticate_user, verify_token
 from .decorators import jwt_required
+from telegramBot.bot import send_message_to_admin
 import json
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 logger.debug("Debug message")
@@ -227,3 +230,21 @@ def delete_user(request, user_id):
     except Exception as e:
         logger.error(f"Error deleting user {user_id}: {e}")
         return JsonResponse({"error": "Failed to delete user"}, status=500)
+
+
+@jwt_required
+@require_http_methods(["POST"])
+def send_message(request):
+    try:
+        data = json.loads(request.body) if request.body else {}
+        text = data.get("message")
+
+        if not text:
+            return JsonResponse({"error": "Message is required"}, status=400)
+
+        user = request.user
+        asyncio.run(send_message_to_admin(user.id, user.login, text))
+        return JsonResponse({"status": "ok"})
+    except Exception as e:
+        logger.error(f"Error sending message: {e}")
+        return JsonResponse({"error": "Failed to send message"}, status=500)

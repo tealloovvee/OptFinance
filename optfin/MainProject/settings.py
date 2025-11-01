@@ -43,6 +43,8 @@ JWT_REFRESH_TOKEN_LIFETIME = 604800
 
 
 INSTALLED_APPS = [
+    'channels',
+    'telegramBot',
     'rest_framework',
     'corsheaders',
     'registration',
@@ -147,6 +149,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MainProject.wsgi.application'
+ASGI_APPLICATION = "MainProject.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
