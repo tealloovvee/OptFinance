@@ -33,8 +33,8 @@ ALLOWED_HOSTS = [
     "192.168.100.7",
 ]
 
-TELEGRAM_BOT_TOKEN = "8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw"
-ADMIN_CHAT_ID = 123456789
+TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default="8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw")
+ADMIN_CHAT_ID = int(env('ADMIN_CHAT_ID', default='123456789'))
 
 JWT_SECRET_KEY = env('JWT_SECRET_KEY', default='your-secret-key-change-in-production')
 JWT_ALGORITHM = 'HS256'
@@ -150,11 +150,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'MainProject.wsgi.application'
 ASGI_APPLICATION = "MainProject.asgi.application"
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+
+REDIS_HOST = env('REDIS_HOST', default='localhost')
+REDIS_PORT = env('REDIS_PORT', default='6379')
+
+if env('USE_REDIS', default='False').lower() == 'true':
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [(REDIS_HOST, int(REDIS_PORT))],
+            },
+        },
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
 
 
 # Database

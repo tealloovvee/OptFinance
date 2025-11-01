@@ -243,7 +243,21 @@ def send_message(request):
             return JsonResponse({"error": "Message is required"}, status=400)
 
         user = request.user
-        asyncio.run(send_message_to_admin(user.id, user.login, text))
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(
+                        lambda: asyncio.run(send_message_to_admin(user.id, user.login, text))
+                    )
+                    future.result(timeout=5)
+            else:
+                loop.run_until_complete(send_message_to_admin(user.id, user.login, text))
+        except RuntimeError:
+            asyncio.run(send_message_to_admin(user.id, user.login, text))
+
         return JsonResponse({"status": "ok"})
     except Exception as e:
         logger.error(f"Error sending message: {e}")
