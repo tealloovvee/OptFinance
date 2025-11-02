@@ -1,0 +1,1 @@
+0 * * * * root cd /codefile && /usr/local/bin/python coingeckoScrapper/main.py >> /var/log/coingecko_scraper.log 2>&1
