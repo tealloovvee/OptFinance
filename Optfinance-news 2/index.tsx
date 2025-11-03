@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 
@@ -226,16 +226,105 @@ const ProfilePage = ({ onBackClick, onLogout }) => (
 const FinanceApp = ({ onLogout }) => {
     const [activePage, setActivePage] = useState('crypto');
     const [view, setView] = useState('dashboard');
+    const [news, setNews] = useState([] as any[]);
+    const [exchanges, setExchanges] = useState([] as any[]);
+    const [cryptocurrencies, setCryptocurrencies] = useState([] as any[]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const API_BASE = (import.meta as any).env?.VITE_API_BASE || 'http://localhost:8000';
+
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+
+        const fetchNews = fetch(`${API_BASE}/news/`).then(r => r.json()).then(d => setNews(d.news || [])).catch(() => setNews([]));
+        const fetchExchanges = fetch(`${API_BASE}/exchanges/`).then(r => r.json()).then(d => setExchanges(d.exchanges || [])).catch(() => setExchanges([]));
+        const fetchCryptos = fetch(`${API_BASE}/cryptocurrencies/`).then(r => r.json()).then(d => setCryptocurrencies(d.cryptocurrencies || [])).catch(() => setCryptocurrencies([]));
+
+        Promise.all([fetchNews, fetchExchanges, fetchCryptos])
+            .then(() => setLoading(false))
+            .catch((e) => { setError('Не удалось загрузить данные'); setLoading(false); });
+    }, []);
 
     const renderPage = () => {
+        if (loading) {
+            return (<main className="main-content"><div className="table-container"><span className="last-updated">Загрузка...</span></div></main>);
+        }
+        if (error) {
+            return (<main className="main-content"><div className="table-container"><span className="last-updated">{error}</span></div></main>);
+        }
         switch (activePage) {
             case 'news':
-                return <NewsDashboard />;
+                return (
+                    <main className="main-content">
+                        <div className="news-grid">
+                            {(news.length ? news : newsData).map((article: any, index: number) => (
+                                <div className="news-card" key={article.id ?? index}>
+                                    <h2>{article.title}</h2>
+                                    <p className="news-excerpt">{article.content || article.excerpt}</p>
+                                    <span className="news-source">{article.source || article.user_login || 'Источник'}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </main>
+                );
             case 'crypto':
             case 'exchanges':
-                return <CryptoDashboard />;
+                return (
+                    <main className="main-content">
+                        <div className="filters-container">
+                            <div className="search-bar">
+                                <span className="search-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                </span>
+                                <input type="text" placeholder="Найти монету..." />
+                            </div>
+                            <button className="filter-button">Категория</button>
+                            <button className="filter-button">Сортировать</button>
+                            <button className="filter-button">Популярность</button>
+                        </div>
+
+                        <div className="table-container">
+                            <span className="last-updated">Последнее обновление</span>
+                            <table className="crypto-table">
+                                <thead>
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Тикер/Пара</th>
+                                        <th>Цена/Объем</th>
+                                        <th>24h %/Рейтинг</th>
+                                        <th>Объем/Монет</th>
+                                        <th>График</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(activePage === 'crypto' ? cryptocurrencies : exchanges).map((item: any, index: number) => (
+                                        <tr key={item.id ?? index}>
+                                            <td><div className="crypto-name"><span>{item.name || item.title || '—'}</span></div></td>
+                                            <td>{item.pair || item.ticker || '—'}</td>
+                                            <td>{item.price || item.trading_volume || '—'}</td>
+                                            <td className={'positive'}>{item.change || item.rating || '—'}</td>
+                                            <td>{item.volume || item.coins_listed || '—'}</td>
+                                            <td></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="pagination">
+                            <button className="page-btn active">1</button>
+                            <button className="page-btn">2</button>
+                            <button className="page-btn">3</button>
+                            <button className="page-btn">&rarr;</button>
+                        </div>
+                    </main>
+                );
             default:
-                return <CryptoDashboard />;
+                return (
+                    <main className="main-content"><div className="table-container"><span className="last-updated">Нет данных</span></div></main>
+                );
         }
     };
 
