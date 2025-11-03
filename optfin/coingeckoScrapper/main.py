@@ -10,7 +10,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "MainProject.settings")
 django.setup()
 
-from modelsMark.models import CryptoCoin, OHLCV
+from modelsMark.models import OHLCV
+from cryptocurrencies.models import CryptoCoin
 
 API_KEY = "CG-tpMDjB6SNKH7F3QWuRpsUrXY"
 COINGECKO_API_OHLC = "https://api.coingecko.com/api/v3/coins/{coin_id}/ohlc"
