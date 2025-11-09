@@ -225,6 +225,16 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'JSON_EDITOR': True,
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

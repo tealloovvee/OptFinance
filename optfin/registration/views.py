@@ -1,14 +1,13 @@
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
 from registration.models import User
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth.hashers import make_password
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
 from .jwt_utils import generate_tokens, authenticate_user, verify_token
 from .decorators import jwt_required
 from telegramBot.bot import send_message_to_admin
-import json
 import logging
 import asyncio
 
@@ -17,11 +16,13 @@ logger.debug("Debug message")
 logger.info("Info message")
 logger.error("Error message")
 
-@require_http_methods(["GET"])
+
+@api_view(['GET'])
+@jwt_required
 def get_user(request, user_id):
     try:
         user = get_object_or_404(User, id=user_id)
-        return JsonResponse({
+        return Response({
             "id": user.id,
             "login": user.login,
             "email": user.email,
@@ -31,13 +32,14 @@ def get_user(request, user_id):
         })
     except Exception as e:
         logger.error(f"Error getting user {user_id}: {e}")
-        return JsonResponse({"error": "User not found"}, status=404)
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@jwt_required
 def update_user(request, user_id):
-    data = json.loads(request.body) if request.body else request.POST
     try:
+        data = request.data
         user = get_object_or_404(User, id=user_id)
 
         login = data.get('login')
@@ -50,7 +52,7 @@ def update_user(request, user_id):
 
         user.save()
         logger.info(f"User updated: {user.login}")
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "id": user.id,
             "login": user.login,
@@ -61,33 +63,29 @@ def update_user(request, user_id):
         })
     except Exception as e:
         logger.error(f"Error updating user {user_id}: {e}")
-        return JsonResponse({"error": "Failed to update user"}, status=500)
+        return Response({"error": "Failed to update user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def register(request):
-    """
-    Регистрация нового пользователя
-    """
     try:
-        data = json.loads(request.body)
+        data = request.data
         login = data.get('login')
         email = data.get('email')
         password = data.get('password')
         role = data.get('role', 'user')
 
         if not login or not email or not password:
-            return JsonResponse({"error": "Missing required fields"}, status=400)
+            return Response({"error": "Missing required fields"}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(login=login).exists():
-            return JsonResponse({"error": "User with this login already exists"}, status=400)
+            return Response({"error": "User with this login already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
-            return JsonResponse({"error": "User with this email already exists"}, status=400)
+            return Response({"error": "User with this email already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
         password_hash = make_password(password)
-
         user = User.objects.create(
             login=login,
             email=email,
@@ -99,7 +97,7 @@ def register(request):
         user.refresh_token = tokens["refresh_token"]
         user.save()
 
-        return JsonResponse({
+        return Response({
             "message": "User registered successfully",
             "user": {
                 "id": user.id,
@@ -110,35 +108,31 @@ def register(request):
             },
             "tokens": tokens
         })
-
     except Exception as e:
         logger.error(f"Error during registration: {e}")
-        return JsonResponse({"error": "Registration failed"}, status=500)
+        return Response({"error": "Registration failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
-    """
-    Вход пользователя
-    """
     try:
-        data = json.loads(request.body)
+        data = request.data
         login_or_email = data.get('login')
         password = data.get('password')
 
         if not login_or_email or not password:
-            return JsonResponse({"error": "Missing credentials"}, status=400)
+            return Response({"error": "Missing credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate_user(login_or_email, password)
         if not user:
-            return JsonResponse({"error": "Invalid credentials"}, status=401)
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
         tokens = generate_tokens(user)
         user.refresh_token = tokens["refresh_token"]
         user.save()
 
-        return JsonResponse({
+        return Response({
             "message": "Login successful",
             "user": {
                 "id": user.id,
@@ -150,54 +144,45 @@ def login(request):
             },
             "tokens": tokens
         })
-
     except Exception as e:
         logger.error(f"Error during login: {e}")
-        return JsonResponse({"error": "Login failed"}, status=500)
+        return Response({"error": "Login failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
 def refresh_token(request):
-    """
-    Обновление токенов
-    """
     try:
-        data = json.loads(request.body)
-        refresh_token = data.get('refresh_token')
-        if not refresh_token:
-            return JsonResponse({"error": "Missing refresh token"}, status=400)
+        data = request.data
+        refresh_token_value = data.get('refresh_token')
+        if not refresh_token_value:
+            return Response({"error": "Missing refresh token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        payload = verify_token(refresh_token)
+        payload = verify_token(refresh_token_value)
         if not payload or payload.get('type') != 'refresh':
-            return JsonResponse({"error": "Invalid refresh token"}, status=401)
+            return Response({"error": "Invalid refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
 
         user = User.objects.get(id=payload['user_id'])
-        if user.refresh_token != refresh_token:
-            return JsonResponse({"error": "Refresh token no longer valid"}, status=401)
+        if user.refresh_token != refresh_token_value:
+            return Response({"error": "Refresh token no longer valid"}, status=status.HTTP_401_UNAUTHORIZED)
 
         tokens = generate_tokens(user)
         user.refresh_token = tokens["refresh_token"]
         user.save()
 
-        return JsonResponse({
+        return Response({
             "message": "Token refreshed successfully",
             "tokens": tokens
         })
-
     except Exception as e:
         logger.error(f"Error refreshing token: {e}")
-        return JsonResponse({"error": "Token refresh failed"}, status=500)
+        return Response({"error": "Token refresh failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['GET'])
 @jwt_required
-@require_http_methods(["GET"])
 def get_profile(request):
-    """
-    Профиль текущего пользователя
-    """
     user = request.user
-    return JsonResponse({
+    return Response({
         "id": user.id,
         "login": user.login,
         "email": user.email,
@@ -207,43 +192,38 @@ def get_profile(request):
     })
 
 
+@api_view(['POST'])
 @jwt_required
-@require_http_methods(["POST"])
 def logout(request):
-    """
-    Выход пользователя — аннулирует refresh-токен
-    """
     user = request.user
     user.refresh_token = None
     user.save()
-    return JsonResponse({"message": "Logged out successfully"})
+    return Response({"message": "Logged out successfully"})
 
 
-@csrf_exempt
-@require_http_methods(["DELETE"])
+@api_view(['DELETE'])
+@jwt_required
 def delete_user(request, user_id):
     try:
         user = get_object_or_404(User, id=user_id)
         user.delete()
         logger.info(f"User deleted: {user_id}")
-        return JsonResponse({"status": "deleted"})
+        return Response({"status": "deleted"})
     except Exception as e:
         logger.error(f"Error deleting user {user_id}: {e}")
-        return JsonResponse({"error": "Failed to delete user"}, status=500)
+        return Response({"error": "Failed to delete user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(['POST'])
 @jwt_required
-@require_http_methods(["POST"])
 def send_message(request):
     try:
-        data = json.loads(request.body) if request.body else {}
+        data = request.data
         text = data.get("message")
-
         if not text:
-            return JsonResponse({"error": "Message is required"}, status=400)
+            return Response({"error": "Message is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-        import asyncio
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
@@ -258,7 +238,7 @@ def send_message(request):
         except RuntimeError:
             asyncio.run(send_message_to_admin(user.id, user.login, text))
 
-        return JsonResponse({"status": "ok"})
+        return Response({"status": "ok"})
     except Exception as e:
         logger.error(f"Error sending message: {e}")
-        return JsonResponse({"error": "Failed to send message"}, status=500)
+        return Response({"error": "Failed to send message"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
