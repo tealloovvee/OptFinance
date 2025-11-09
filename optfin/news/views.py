@@ -1,13 +1,13 @@
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 from news.models import News
-from django.views.decorators.http import require_http_methods
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from registration.decorators import jwt_required
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
-import json
-import logging
 import base64
+import logging
+import json
 
 logger = logging.getLogger(__name__)
 logger.debug("Debug message")
@@ -35,72 +35,59 @@ def serialize_news(news_item):
     }
 
 
-@require_http_methods(["GET"])
+@api_view(['GET'])
 def get_all_news(request):
-    """
-    Получить все новости
-    """
+    """Получить все новости"""
     try:
         news_list = News.objects.all().order_by('-published_at')
         news_data = [serialize_news(news) for news in news_list]
-
         logger.info(f"Retrieved {len(news_data)} news items")
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "count": len(news_data),
             "news": news_data
         })
     except Exception as e:
         logger.error(f"Error getting all news: {e}")
-        return JsonResponse({"error": "Failed to retrieve news"}, status=500)
+        return Response({"error": "Failed to retrieve news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@require_http_methods(["GET"])
+@api_view(['GET'])
 def take_news(request, news_id):
-    """
-    Получить одну новость по ID
-    """
+    """Получить одну новость по ID"""
     try:
         news = get_object_or_404(News, id=news_id)
-        news_data = serialize_news(news)
-
-        logger.info(f"Retrieved news {news_id}")
-        return JsonResponse({
+        return Response({
             "status": "ok",
-            "news": news_data
+            "news": serialize_news(news)
         })
     except Exception as e:
         logger.error(f"Error getting news {news_id}: {e}")
-        return JsonResponse({"error": "News not found"}, status=404)
+        return Response({"error": "News not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-@csrf_exempt
+@api_view(['POST'])
 @jwt_required
-@require_http_methods(["POST"])
 def create_news(request):
-    """
-    Создать новость (требуется аутентификация)
-    """
+    """Создать новость (требуется аутентификация)"""
     try:
-        data = json.loads(request.body) if request.body else request.POST
-
+        data = request.data
         title = data.get('title')
         content = data.get('content')
-        photo_base64 = data.get('photo', None)
-        published_at = data.get('published_at', None)
+        photo_base64 = data.get('photo')
+        published_at = data.get('published_at')
 
         if not title or not content:
-            return JsonResponse({"error": "Missing required fields: title and content"}, status=400)
+            return Response({"error": "Missing required fields: title and content"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-
         photo_binary = None
         if photo_base64:
             try:
                 photo_binary = base64.b64decode(photo_base64)
             except Exception as e:
                 logger.error(f"Error decoding photo: {e}")
-                return JsonResponse({"error": "Invalid photo format"}, status=400)
+                return Response({"error": "Invalid photo format"}, status=status.HTTP_400_BAD_REQUEST)
 
         if published_at:
             try:
@@ -121,37 +108,30 @@ def create_news(request):
         )
 
         logger.info(f"News created: {news.id} by user {user.id}")
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "message": "News created successfully",
             "news": serialize_news(news)
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
 
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON in request body")
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
         logger.error(f"Error creating news: {e}")
-        return JsonResponse({"error": "Failed to create news"}, status=500)
+        return Response({"error": "Failed to create news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt
+@api_view(['PUT', 'PATCH'])
 @jwt_required
-@require_http_methods(["PUT", "PATCH"])
 def update_news(request, news_id):
-    """
-    Обновить новость (требуется аутентификация, только автор или админ)
-    """
+    """Обновить новость (требуется аутентификация, только автор или админ)"""
     try:
         news = get_object_or_404(News, id=news_id)
         user = request.user
 
         if news.user_id.id != user.id and user.role != 'admin':
             logger.warning(f"User {user.id} tried to update news {news_id} without permission")
-            return JsonResponse({"error": "Permission denied. You can only edit your own news."}, status=403)
+            return Response({"error": "Permission denied. You can only edit your own news."}, status=status.HTTP_403_FORBIDDEN)
 
-        data = json.loads(request.body) if request.body else request.POST
-
+        data = request.data
         title = data.get('title')
         content = data.get('content')
         photo_base64 = data.get('photo')
@@ -159,10 +139,8 @@ def update_news(request, news_id):
 
         if title is not None:
             news.title = title
-
         if content is not None:
             news.content = content
-
         if photo_base64 is not None:
             if photo_base64 == "" or photo_base64 is None:
                 news.photo = None
@@ -171,28 +149,23 @@ def update_news(request, news_id):
                     news.photo = base64.b64decode(photo_base64)
                 except Exception as e:
                     logger.error(f"Error decoding photo: {e}")
-                    return JsonResponse({"error": "Invalid photo format"}, status=400)
-
+                    return Response({"error": "Invalid photo format"}, status=status.HTTP_400_BAD_REQUEST)
         if published_at is not None:
             try:
                 from datetime import datetime
                 news.published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
             except Exception as e:
                 logger.error(f"Error parsing published_at: {e}")
-                return JsonResponse({"error": "Invalid date format"}, status=400)
+                return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
 
         news.save()
-
         logger.info(f"News {news_id} updated by user {user.id}")
-        return JsonResponse({
+        return Response({
             "status": "ok",
             "message": "News updated successfully",
             "news": serialize_news(news)
         })
 
-    except json.JSONDecodeError:
-        logger.error("Invalid JSON in request body")
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
         logger.error(f"Error updating news {news_id}: {e}")
-        return JsonResponse({"error": "Failed to update news"}, status=500)
+        return Response({"error": "Failed to update news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
