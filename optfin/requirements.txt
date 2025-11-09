@@ -15,10 +15,12 @@ Django==5.2.6
 django-cors-headers==4.9.0
 django-environ==0.12.0
 djangorestframework==3.16.1
+drf-yasg==1.21.11
 environ==1.0
 frozenlist==1.8.0
 gunicorn==23.0.0
 idna==3.10
+inflection==0.5.1
 iniconfig==2.3.0
 magic-filter==1.0.12
 msgpack==1.1.2
@@ -32,11 +34,14 @@ pydantic_core==2.33.2
 Pygments==2.19.2
 PyJWT==2.10.1
 pytest==8.4.2
+pytz==2025.2
+PyYAML==6.0.3
 redis==7.0.1
 requests==2.32.5
 sqlparse==0.5.3
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
+uritemplate==4.2.0
 urllib3==2.5.0
 yarl==1.22.0

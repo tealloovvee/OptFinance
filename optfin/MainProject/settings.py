@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'channels',
     'telegramBot',
     'rest_framework',
+    'drf_yasg',
     'corsheaders',
     'registration',
     'cryptocurrencies',
@@ -219,7 +220,6 @@ USE_TZ = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React dev server
     "http://127.0.0.1:3000",
-    # Add your frontend production URL here
     # "https://your-frontend-domain.com",
 ]
 CORS_ALLOW_ALL_ORIGINS = True
