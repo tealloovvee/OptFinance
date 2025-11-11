@@ -108,3 +108,78 @@ DELETE /registration/users/{user_id}/delete/
 Удалить пользователя по его ID. Требуется аутентификация.
 POST /registration/users/{user_id}/update/
 Обновить информацию о пользователе по его ID. Требуется аутентификация.
+=======
+## Сетевое взаимодействие Клиента и Сервера
+
+Ниже описано, как организовано и запускается сетевое взаимодействие между фронтендом (Vite/React) и бэкендом (Django REST + Channels).
+
+### Что уже есть
+- Бэкенд (Django) поднимает REST‑эндпоинты:
+  - `GET /news/` — список новостей
+  - `GET /exchanges/` — список бирж
+  - `GET /cryptocurrencies/` — список криптовалют
+  - `POST /registration/auth/login/`, `POST /registration/auth/register/`, и др. — аутентификация
+- Включён CORS: фронтенд может обращаться к API с другого порта/домена.
+- Поддержка WebSocket через Django Channels подключена для модуля `registration` (чат), но на фронтенде можно подключать позже.
+
+### Как запустить локально
+1) Бэкенд (Django):
+- Перейдите в директорию `optfin/`
+- Убедитесь, что у вас настроены переменные окружения (см. `optfin/MainProject/settings.py` ожидает `.env`)
+- Установите зависимости: `pip install -r requirements.txt`
+- Выполните миграции: `python manage.py migrate`
+- Запустите сервер: `python manage.py runserver 0.0.0.0:8000`
+
+2) Фронтенд (Vite/React):
+- Выберите один из фронтов. В примере используется `Optfinance-news 2/`
+- Перейдите в директорию `Optfinance-news 2/`
+- Установите зависимости: `npm install`
+- (Опционально) Создайте файл `.env` и укажите адрес API, например:
+  - `VITE_API_BASE=http://localhost:8000`
+- Запустите dev‑сервер: `npm run dev`
+
+Теперь фронтенд (порт 5173 по умолчанию у Vite) может обращаться к бэкенду на `http://localhost:8000`.
+
+### Как фронтенд обращается к API
+Во фронтенде добавлен вызов REST из файла `Optfinance-news 2/index.tsx`. Он запрашивает:
+- `GET {VITE_API_BASE}/news/` → отрисовывает карточки новостей
+- `GET {VITE_API_BASE}/exchanges/` → таблица бирж
+- `GET {VITE_API_BASE}/cryptocurrencies/` → таблица монет
+
+Если переменная `VITE_API_BASE` не задана, используется `http://localhost:8000` по умолчанию.
+
+### Базовые принципы выбранного метода
+- REST: клиент делает HTTP‑запросы (`GET`, `POST`, и т.д.) к URL‑ресурсам сервера и получает JSON. Это просто, прозрачно, кэшируемо и хорошо поддерживается инструментами.
+- CORS: механизм браузера, разрешающий фронтенду на одном домене/порту вызывать API на другом. В проекте включён `corsheaders`, и разрешён доступ для локальной разработки.
+- WebSocket (реалтайм): проект настроен на работу через ASGI/Channels и использует middleware для JWT‑аутентификации в веб‑сокетах. Это удобно для чатов и уведомлений. При необходимости фронтенд может подключиться к `ws://<host>/...` маршрутам из `registration.routing`.
+
+### Частые проблемы и решения
+- 403/CSRF при `POST` из браузера: для публичных `GET` проблем нет, для защищённых методов используйте JWT из `/registration/auth/login/` и передавайте `Authorization: Bearer <token>`.
+- CORS ошибка в консоли: проверьте `CORS_ALLOWED_ORIGINS` или `CORS_ALLOW_ALL_ORIGINS=True` и корректность `VITE_API_BASE`.
+- 404 при запросе: убедитесь, что URL совпадает с маршрутами из `optfin/MainProject/urls.py` и *app* `urls.py`.
+
+## Swagger (документирование backend)
+
+В проект добавлена авто‑документация API с помощью Swagger (drf‑yasg).
+
+### Как запустить и открыть документацию
+1) Запустите бэкенд (см. выше): `python manage.py runserver 0.0.0.0:8000`
+2) Откройте в браузере:
+- Swagger UI: `http://localhost:8000/swagger/`
+- ReDoc: `http://localhost:8000/redoc/`
+- Сырые схемы: `http://localhost:8000/swagger.json` или `http://localhost:8000/swagger.yaml`
+
+### Что это даёт
+- Просмотр всех доступных эндпоинтов, их параметров, кодов ответов и моделей данных.
+- Тестирование запросов прямо из браузера (кнопка Try it out в Swagger UI).
+- Автоматическое обновление схемы при добавлении/изменении вьюх.
+
+### Аутентификация в Swagger UI
+- Для защищённых эндпоинтов используйте JWT из логина `/registration/auth/login/`.
+- В Swagger UI нажмите Authorize и вставьте токен как `Bearer <ваш_JWT>`.
+
+### Технические детали
+- Зависимость: `drf-yasg` добавлена в `optfin/requirements.txt`.
+- Маршруты документации объявлены в `optfin/MainProject/urls.py`:
+  - `/swagger/`, `/redoc/`, `/swagger.json`, `/swagger.yaml`.
+
