@@ -34,4 +34,4 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static('/assets/', document_root=settings.STATIC_ROOT + '/assets')
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

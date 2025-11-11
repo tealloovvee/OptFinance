@@ -234,6 +234,15 @@ REST_FRAMEWORK = {
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'JSON_EDITOR': True,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'Формат: Bearer <access_token>',
+        }
+    },
+    'DEFAULT_API_URL': None,
 }
 
 # Static files (CSS, JavaScript, Images)
