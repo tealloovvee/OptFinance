@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from logging.handlers import RotatingFileHandler
 import environ
 import logging
 
@@ -40,6 +41,16 @@ JWT_SECRET_KEY = env('JWT_SECRET_KEY', default='your-secret-key-change-in-produc
 JWT_ALGORITHM = 'HS256'
 JWT_ACCESS_TOKEN_LIFETIME = 3600
 JWT_REFRESH_TOKEN_LIFETIME = 604800
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='your_email@mail.ru')
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.mail.ru')
+EMAIL_PORT = env.int('EMAIL_PORT', default=465)
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=True)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=False)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='your_email@mail.ru')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='your_app_password')
+EMAIL_CONFIRMATION_URL = env('EMAIL_CONFIRMATION_URL', default='http://localhost:8000/registration/auth/confirm')
+EMAIL_CONFIRMATION_TOKEN_MAX_AGE = env.int('EMAIL_CONFIRMATION_TOKEN_MAX_AGE', default=60 * 60 * 24)
 
 
 INSTALLED_APPS = [
@@ -74,6 +85,7 @@ class SingleLevelFilter(logging.Filter):
     def filter(self, record):
         return record.levelno == self.level
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -83,32 +95,30 @@ LOGGING = {
             'style': '{',
         },
     },
-    'filters': {
-        'debug_filter': {'()': SingleLevelFilter, 'level': logging.DEBUG},
-        'info_filter': {'()': SingleLevelFilter, 'level': logging.INFO},
-        'error_filter': {'()': SingleLevelFilter, 'level': logging.ERROR},
-    },
     'handlers': {
         'debug_file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'debug.log'),
+            'maxBytes': 5*1024*1024,
+            'backupCount': 5,
             'formatter': 'detailed',
-            'filters': ['debug_filter'],
         },
         'info_file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'info.log'),
+            'maxBytes': 5*1024*1024,
+            'backupCount': 5,
             'formatter': 'detailed',
-            'filters': ['info_filter'],
         },
         'error_file': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(LOG_DIR, 'error.log'),
+            'maxBytes': 5*1024*1024,
+            'backupCount': 5,
             'formatter': 'detailed',
-            'filters': ['error_filter'],
         },
     },
     'loggers': {

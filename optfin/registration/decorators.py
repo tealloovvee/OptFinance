@@ -4,9 +4,7 @@ from registration.models import User
 from .jwt_utils import verify_token
 
 def jwt_required(view_func):
-    """
-    Декоратор для защиты эндпоинтов JWT токеном
-    """
+
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
@@ -24,6 +22,9 @@ def jwt_required(view_func):
             user = User.objects.get(id=payload['user_id'])
         except User.DoesNotExist:
             return JsonResponse({'error': 'User not found'}, status=401)
+
+        if not user.is_active:
+            return JsonResponse({'error': 'Email not confirmed'}, status=403)
 
         request.user = user
         return view_func(request, *args, **kwargs)
