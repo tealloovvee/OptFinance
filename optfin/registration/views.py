@@ -1,15 +1,21 @@
-from django.shortcuts import get_object_or_404
-from registration.models import User
+import asyncio
+import logging
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.core.mail import EmailMultiAlternatives
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.html import strip_tags
+from registration.models import User
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from .jwt_utils import generate_tokens, authenticate_user, verify_token
-from .decorators import jwt_required
 from telegramBot.bot import send_message_to_admin
-import logging
-import asyncio
+from .decorators import jwt_required
+from .jwt_utils import authenticate_user, generate_tokens, verify_token
+from .utils import generate_email_confirmation_token, verify_email_confirmation_token
 
 logger = logging.getLogger(__name__)
 logger.debug("Debug message")
@@ -90,24 +96,47 @@ def register(request):
             login=login,
             email=email,
             password_hash=password_hash,
-            role=role
+            role=role,
+            is_active=False
         )
 
-        tokens = generate_tokens(user)
-        user.refresh_token = tokens["refresh_token"]
-        user.save()
+        token = generate_email_confirmation_token(user.email)
+        base_confirmation_url = getattr(settings, 'EMAIL_CONFIRMATION_URL', '').rstrip('/')
+        confirmation_link = (
+            f"{base_confirmation_url}/{token}/"
+            if base_confirmation_url
+            else request.build_absolute_uri(reverse('confirm_email', args=[token]))
+        )
+
+        context = {
+            "login": user.login,
+            "confirmation_link": confirmation_link,
+        }
+        html_message = render_to_string('registration/email_confirmation.html', context)
+        text_message = strip_tags(html_message)
+        try:
+            email_message = EmailMultiAlternatives(
+                subject="Подтверждение регистрации",
+                body=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
+            )
+            email_message.attach_alternative(html_message, "text/html")
+            email_message.send()
+        except Exception as mail_error:
+            logger.error(f"Failed to send confirmation email: {mail_error}")
+            return Response({"error": "Failed to send confirmation email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({
-            "message": "User registered successfully",
+            "message": "User registered successfully. Please confirm your email to activate the account.",
             "user": {
                 "id": user.id,
                 "login": user.login,
                 "email": user.email,
                 "role": user.role,
                 "created_at": user.created_at.isoformat()
-            },
-            "tokens": tokens
-        })
+            }
+        }, status=status.HTTP_201_CREATED)
     except Exception as e:
         logger.error(f"Error during registration: {e}")
         return Response({"error": "Registration failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -127,6 +156,9 @@ def login(request):
         user = authenticate_user(login_or_email, password)
         if not user:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not user.is_active:
+            return Response({"error": "Email not confirmed"}, status=status.HTTP_403_FORBIDDEN)
 
         tokens = generate_tokens(user)
         user.refresh_token = tokens["refresh_token"]
@@ -164,6 +196,9 @@ def refresh_token(request):
         user = User.objects.get(id=payload['user_id'])
         if user.refresh_token != refresh_token_value:
             return Response({"error": "Refresh token no longer valid"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not user.is_active:
+            return Response({"error": "Email not confirmed"}, status=status.HTTP_403_FORBIDDEN)
 
         tokens = generate_tokens(user)
         user.refresh_token = tokens["refresh_token"]
@@ -242,3 +277,23 @@ def send_message(request):
     except Exception as e:
         logger.error(f"Error sending message: {e}")
         return Response({"error": "Failed to send message"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def confirm_email(request, token):
+    email = verify_email_confirmation_token(token)
+    if not email:
+        return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if user.is_active:
+        return Response({"message": "Email is already confirmed"})
+
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+    return Response({"message": "Email confirmed successfully"})
