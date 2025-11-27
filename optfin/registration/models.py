@@ -10,6 +10,7 @@ class User(models.Model):
     portfolios_created = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     refresh_token = models.CharField(max_length=500, blank=True, null=True)
+    profile_image = models.BinaryField(blank=True, null=True)
 
     def __str__(self):
         return self.login
