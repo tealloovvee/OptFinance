@@ -16,6 +16,9 @@ from telegramBot.bot import send_message_to_admin
 from .decorators import jwt_required
 from .jwt_utils import authenticate_user, generate_tokens, verify_token
 from .utils import generate_email_confirmation_token, verify_email_confirmation_token
+from base64 import b64encode, b64decode
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 
 logger = logging.getLogger(__name__)
 logger.debug("Debug message")
@@ -297,3 +300,31 @@ def confirm_email(request, token):
     user.is_active = True
     user.save(update_fields=['is_active'])
     return Response({"message": "Email confirmed successfully"})
+
+# photo
+
+
+@api_view(['POST'])
+@jwt_required
+@parser_classes([MultiPartParser, FormParser])
+def upload_profile_image(request):
+    user = request.user
+    file = request.FILES.get('profile_image')
+
+    if not file:
+        return Response({"error": "No file provided"}, status=400)
+
+    user.profile_image = file.read()
+    user.save()
+
+    return Response({"message": "Profile image uploaded successfully"})
+
+@api_view(['GET'])
+@jwt_required
+def get_profile_image(request):
+    user = request.user
+    if not user.profile_image:
+        return Response({"profile_image": None})
+
+    encoded_image = b64encode(user.profile_image).decode('utf-8')
+    return Response({"profile_image": encoded_image})
