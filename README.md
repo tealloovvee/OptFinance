@@ -183,3 +183,8 @@ POST /registration/users/{user_id}/update/
 - Маршруты документации объявлены в `optfin/MainProject/urls.py`:
   - `/swagger/`, `/redoc/`, `/swagger.json`, `/swagger.yaml`.
 
+
+### docker 
+для бэкенда инструкция докера находится в файле readmeDocker.txt в проекте optfin, для фронтенда 
+инструкция находится в файле readmeDockerFront.txt в папке frontend
+
