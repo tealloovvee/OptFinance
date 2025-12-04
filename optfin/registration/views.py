@@ -26,53 +26,56 @@ logger.info("Info message")
 logger.error("Error message")
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @jwt_required
-def get_user(request, user_id):
+def get_or_update_user(request, user_id):
     try:
         user = get_object_or_404(User, id=user_id)
-        return Response({
-            "id": user.id,
-            "login": user.login,
-            "email": user.email,
-            "role": user.role,
-            "portfolios_created": user.portfolios_created,
-            "created_at": user.created_at.isoformat()
-        })
+
+        if request.method == 'GET':
+            return Response({
+                "id": user.id,
+                "login": user.login,
+                "email": user.email,
+                "role": user.role,
+                "portfolios_created": user.portfolios_created,
+                "created_at": user.created_at.isoformat()
+            })
+        elif request.method == 'PUT':
+            data = request.data
+            login = data.get('login')
+            email = data.get('email')
+
+            if login:
+                user.login = login
+            if email:
+                user.email = email
+
+            user.save()
+            logger.info(f"User updated: {user.login}")
+            return Response({
+                "status": "ok",
+                "id": user.id,
+                "login": user.login,
+                "email": user.email,
+                "role": user.role,
+                "portfolios_created": user.portfolios_created,
+                "created_at": user.created_at.isoformat()
+            })
+        elif request.method == 'DELETE':
+            user.delete()
+            logger.info(f"User deleted: {user_id}")
+            return Response({"status": "deleted"})
     except Exception as e:
-        logger.error(f"Error getting user {user_id}: {e}")
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['POST'])
-@jwt_required
-def update_user(request, user_id):
-    try:
-        data = request.data
-        user = get_object_or_404(User, id=user_id)
-
-        login = data.get('login')
-        email = data.get('email')
-
-        if login:
-            user.login = login
-        if email:
-            user.email = email
-
-        user.save()
-        logger.info(f"User updated: {user.login}")
-        return Response({
-            "status": "ok",
-            "id": user.id,
-            "login": user.login,
-            "email": user.email,
-            "role": user.role,
-            "portfolios_created": user.portfolios_created,
-            "created_at": user.created_at.isoformat()
-        })
-    except Exception as e:
-        logger.error(f"Error updating user {user_id}: {e}")
-        return Response({"error": "Failed to update user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if request.method == 'GET':
+            logger.error(f"Error getting user {user_id}: {e}")
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        elif request.method == 'DELETE':
+            logger.error(f"Error deleting user {user_id}: {e}")
+            return Response({"error": "Failed to delete user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            logger.error(f"Error updating user {user_id}: {e}")
+            return Response({"error": "Failed to update user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -128,7 +131,8 @@ def register(request):
             email_message.send()
         except Exception as mail_error:
             logger.error(f"Failed to send confirmation email: {mail_error}")
-            return Response({"error": "Failed to send confirmation email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "Failed to send confirmation email"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({
             "message": "User registered successfully. Please confirm your email to activate the account.",
@@ -239,19 +243,6 @@ def logout(request):
     return Response({"message": "Logged out successfully"})
 
 
-@api_view(['DELETE'])
-@jwt_required
-def delete_user(request, user_id):
-    try:
-        user = get_object_or_404(User, id=user_id)
-        user.delete()
-        logger.info(f"User deleted: {user_id}")
-        return Response({"status": "deleted"})
-    except Exception as e:
-        logger.error(f"Error deleting user {user_id}: {e}")
-        return Response({"error": "Failed to delete user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 @api_view(['POST'])
 @jwt_required
 def send_message(request):
@@ -301,7 +292,7 @@ def confirm_email(request, token):
     user.save(update_fields=['is_active'])
     return Response({"message": "Email confirmed successfully"})
 
-# photo
+
 
 
 @api_view(['POST'])
@@ -318,6 +309,7 @@ def upload_profile_image(request):
     user.save()
 
     return Response({"message": "Profile image uploaded successfully"})
+
 
 @api_view(['GET'])
 @jwt_required

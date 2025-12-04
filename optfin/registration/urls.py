@@ -8,8 +8,6 @@ urlpatterns = [
     path('auth/logout/', views.logout, name='logout'),
     path('auth/profile/', views.get_profile, name='get_profile'),
     path('auth/confirm/<str:token>/', views.confirm_email, name='confirm_email'),
-    path('users/<int:user_id>/', views.get_user),
-    path('users/<int:user_id>/update/', views.update_user),
-    path('users/<int:user_id>/delete/', views.delete_user),
+    path('users/<int:user_id>/', views.get_or_update_user),
     path('chat/send/', views.send_message, name='send_message'),
 ]
