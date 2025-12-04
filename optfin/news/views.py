@@ -35,137 +35,177 @@ def serialize_news(news_item):
     }
 
 
-@api_view(['GET'])
-def get_all_news(request):
-    """Получить все новости"""
-    try:
-        news_list = News.objects.all().order_by('-published_at')
-        news_data = [serialize_news(news) for news in news_list]
-        logger.info(f"Retrieved {len(news_data)} news items")
-        return Response({
-            "status": "ok",
-            "count": len(news_data),
-            "news": news_data
-        })
-    except Exception as e:
-        logger.error(f"Error getting all news: {e}")
-        return Response({"error": "Failed to retrieve news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(['GET', 'POST'])
+def get_or_create_news(request):
+    """Получить все новости или создать новую"""
+    if request.method == 'GET':
+        try:
+            news_list = News.objects.all().order_by('-published_at')
+            news_data = [serialize_news(news) for news in news_list]
+            logger.info(f"Retrieved {len(news_data)} news items")
+            return Response({
+                "status": "ok",
+                "count": len(news_data),
+                "news": news_data
+            })
+        except Exception as e:
+            logger.error(f"Error getting all news: {e}")
+            return Response({"error": "Failed to retrieve news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    elif request.method == 'POST':
+        # Создание новости (требуется аутентификация)
+        from registration.jwt_utils import verify_token
+        from registration.models import User
 
+        # Проверка аутентификации
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        if not auth_header.startswith('Bearer '):
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
-@api_view(['GET'])
-def take_news(request, news_id):
-    """Получить одну новость по ID"""
-    try:
-        news = get_object_or_404(News, id=news_id)
-        return Response({
-            "status": "ok",
-            "news": serialize_news(news)
-        })
-    except Exception as e:
-        logger.error(f"Error getting news {news_id}: {e}")
-        return Response({"error": "News not found"}, status=status.HTTP_404_NOT_FOUND)
+        token = auth_header.split(' ')[1]
+        payload = verify_token(token)
 
+        if not payload or payload.get('type') != 'access':
+            return Response({"error": "Invalid or expired token"}, status=status.HTTP_401_UNAUTHORIZED)
 
-@api_view(['POST'])
-@jwt_required
-def create_news(request):
-    """Создать новость (требуется аутентификация)"""
-    try:
-        data = request.data
-        title = data.get('title')
-        content = data.get('content')
-        photo_base64 = data.get('photo')
-        published_at = data.get('published_at')
+        try:
+            user = User.objects.get(id=payload['user_id'])
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not title or not content:
-            return Response({"error": "Missing required fields: title and content"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.is_active:
+            return Response({"error": "Email not confirmed"}, status=status.HTTP_403_FORBIDDEN)
 
-        user = request.user
-        photo_binary = None
-        if photo_base64:
-            try:
-                photo_binary = base64.b64decode(photo_base64)
-            except Exception as e:
-                logger.error(f"Error decoding photo: {e}")
-                return Response({"error": "Invalid photo format"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = request.data
+            title = data.get('title')
+            content = data.get('content')
+            photo_base64 = data.get('photo')
+            published_at = data.get('published_at')
 
-        if published_at:
-            try:
-                from datetime import datetime
-                published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
-            except Exception as e:
-                logger.error(f"Error parsing published_at: {e}")
-                published_at = timezone.now()
-        else:
-            published_at = timezone.now()
+            if not title or not content:
+                return Response({"error": "Missing required fields: title and content"},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        news = News.objects.create(
-            title=title,
-            content=content,
-            published_at=published_at,
-            photo=photo_binary,
-            user_id=user
-        )
-
-        logger.info(f"News created: {news.id} by user {user.id}")
-        return Response({
-            "status": "ok",
-            "message": "News created successfully",
-            "news": serialize_news(news)
-        }, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        logger.error(f"Error creating news: {e}")
-        return Response({"error": "Failed to create news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@api_view(['PUT', 'PATCH'])
-@jwt_required
-def update_news(request, news_id):
-    """Обновить новость (требуется аутентификация, только автор или админ)"""
-    try:
-        news = get_object_or_404(News, id=news_id)
-        user = request.user
-
-        if news.user_id.id != user.id and user.role != 'admin':
-            logger.warning(f"User {user.id} tried to update news {news_id} without permission")
-            return Response({"error": "Permission denied. You can only edit your own news."}, status=status.HTTP_403_FORBIDDEN)
-
-        data = request.data
-        title = data.get('title')
-        content = data.get('content')
-        photo_base64 = data.get('photo')
-        published_at = data.get('published_at')
-
-        if title is not None:
-            news.title = title
-        if content is not None:
-            news.content = content
-        if photo_base64 is not None:
-            if photo_base64 == "" or photo_base64 is None:
-                news.photo = None
-            else:
+            photo_binary = None
+            if photo_base64:
                 try:
-                    news.photo = base64.b64decode(photo_base64)
+                    photo_binary = base64.b64decode(photo_base64)
                 except Exception as e:
                     logger.error(f"Error decoding photo: {e}")
                     return Response({"error": "Invalid photo format"}, status=status.HTTP_400_BAD_REQUEST)
-        if published_at is not None:
+
+            if published_at:
+                try:
+                    from datetime import datetime
+                    published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+                except Exception as e:
+                    logger.error(f"Error parsing published_at: {e}")
+                    published_at = timezone.now()
+            else:
+                published_at = timezone.now()
+
+            news = News.objects.create(
+                title=title,
+                content=content,
+                published_at=published_at,
+                photo=photo_binary,
+                user_id=user
+            )
+
+            logger.info(f"News created: {news.id} by user {user.id}")
+            return Response({
+                "status": "ok",
+                "message": "News created successfully",
+                "news": serialize_news(news)
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.error(f"Error creating news: {e}")
+            return Response({"error": "Failed to create news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'PUT', 'PATCH'])
+def get_or_update_news(request, news_id):
+    """Получить или обновить новость по ID"""
+    try:
+        news = get_object_or_404(News, id=news_id)
+
+        if request.method == 'GET':
+            return Response({
+                "status": "ok",
+                "news": serialize_news(news)
+            })
+        elif request.method in ['PUT', 'PATCH']:
+            # Обновление новости (требуется аутентификация, только автор или админ)
+            from registration.jwt_utils import verify_token
+            from registration.models import User
+
+            # Проверка аутентификации
+            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            if not auth_header.startswith('Bearer '):
+                return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            token = auth_header.split(' ')[1]
+            payload = verify_token(token)
+
+            if not payload or payload.get('type') != 'access':
+                return Response({"error": "Invalid or expired token"}, status=status.HTTP_401_UNAUTHORIZED)
+
             try:
-                from datetime import datetime
-                news.published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
-            except Exception as e:
-                logger.error(f"Error parsing published_at: {e}")
-                return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+                user = User.objects.get(id=payload['user_id'])
+            except User.DoesNotExist:
+                return Response({"error": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        news.save()
-        logger.info(f"News {news_id} updated by user {user.id}")
-        return Response({
-            "status": "ok",
-            "message": "News updated successfully",
-            "news": serialize_news(news)
-        })
+            if not user.is_active:
+                return Response({"error": "Email not confirmed"}, status=status.HTTP_403_FORBIDDEN)
 
+            if news.user_id.id != user.id and user.role != 'admin':
+                logger.warning(f"User {user.id} tried to update news {news_id} without permission")
+                return Response({"error": "Permission denied. You can only edit your own news."},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            data = request.data
+            title = data.get('title')
+            content = data.get('content')
+            photo_base64 = data.get('photo')
+            published_at = data.get('published_at')
+
+            if title is not None:
+                news.title = title
+            if content is not None:
+                news.content = content
+            if photo_base64 is not None:
+                if photo_base64 == "" or photo_base64 is None:
+                    news.photo = None
+                else:
+                    try:
+                        news.photo = base64.b64decode(photo_base64)
+                    except Exception as e:
+                        logger.error(f"Error decoding photo: {e}")
+                        return Response({"error": "Invalid photo format"}, status=status.HTTP_400_BAD_REQUEST)
+            if published_at is not None:
+                try:
+                    from datetime import datetime
+                    news.published_at = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+                except Exception as e:
+                    logger.error(f"Error parsing published_at: {e}")
+                    return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+
+            news.save()
+            logger.info(f"News {news_id} updated by user {user.id}")
+            return Response({
+                "status": "ok",
+                "message": "News updated successfully",
+                "news": serialize_news(news)
+            })
     except Exception as e:
-        logger.error(f"Error updating news {news_id}: {e}")
-        return Response({"error": "Failed to update news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if request.method == 'GET':
+            logger.error(f"Error getting news {news_id}: {e}")
+            return Response({"error": "News not found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            logger.error(f"Error updating news {news_id}: {e}")
+            return Response({"error": "Failed to update news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
