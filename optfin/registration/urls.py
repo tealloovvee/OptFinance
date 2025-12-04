@@ -9,5 +9,4 @@ urlpatterns = [
     path('auth/profile/', views.get_profile, name='get_profile'),
     path('auth/confirm/<str:token>/', views.confirm_email, name='confirm_email'),
     path('users/<int:user_id>/', views.get_or_update_user),
-    path('chat/send/', views.send_message, name='send_message'),
 ]

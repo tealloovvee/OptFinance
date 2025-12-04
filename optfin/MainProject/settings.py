@@ -54,6 +54,7 @@ EMAIL_CONFIRMATION_TOKEN_MAX_AGE = env.int('EMAIL_CONFIRMATION_TOKEN_MAX_AGE', d
 
 
 INSTALLED_APPS = [
+    'telegramChat',
     'channels',
     'telegramBot',
     'rest_framework',
