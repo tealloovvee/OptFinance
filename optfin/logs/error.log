@@ -152,3 +152,17 @@ connector: <aiohttp.connector.TCPConnector object at 0x7f729b647b60>
 2025-12-10 11:44:58,290 ERROR cryptocurrencies.views Error message
 2025-12-10 11:44:58,336 ERROR exchanges.views Error message
 2025-12-10 11:44:58,390 ERROR telegramChat.views Error message
+2025-12-10 15:09:19,003 ERROR registration.views Error message
+2025-12-10 15:09:19,033 ERROR news.views Error message
+2025-12-10 15:10:18,441 ERROR registration.views Error message
+2025-12-10 15:10:18,456 ERROR news.views Error message
+2025-12-10 15:13:08,202 ERROR registration.views Error message
+2025-12-10 15:13:08,217 ERROR news.views Error message
+2025-12-10 15:13:08,252 ERROR cryptocurrencies.views Error message
+2025-12-10 15:13:08,266 ERROR exchanges.views Error message
+2025-12-10 15:13:08,278 ERROR telegramChat.views Error message
+2025-12-10 15:13:28,717 ERROR registration.views Error message
+2025-12-10 15:13:28,752 ERROR news.views Error message
+2025-12-10 15:13:28,796 ERROR cryptocurrencies.views Error message
+2025-12-10 15:13:28,853 ERROR exchanges.views Error message
+2025-12-10 15:13:28,911 ERROR telegramChat.views Error message
