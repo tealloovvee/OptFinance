@@ -35,10 +35,26 @@ def serialize_news(news_item):
     }
 
 
-@api_view(['GET', 'POST'])
-def get_or_create_news(request):
+@api_view(['GET', 'POST', 'DELETE'])
+def get_delete_create_news(request):
     """Получить все новости или создать новую"""
-    if request.method == 'GET':
+    if request.method == 'DELETE':
+        news_id = request.query_params.get('id')
+        if not news_id:
+            return Response({"error": "News id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            news = News.objects.get(id=news_id)
+            news.delete()
+            logger.info(f"News deleted: {news_id}")
+            return Response({"status": "ok", "message": f"News {news_id} deleted successfully"})
+        except News.DoesNotExist:
+            return Response({"error": "News not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error deleting news: {e}")
+            return Response({"error": "Failed to delete news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif request.method == 'GET':
         try:
             news_list = News.objects.all().order_by('-published_at')
             news_data = [serialize_news(news) for news in news_list]
