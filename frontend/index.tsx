@@ -1,31 +1,8 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
-*/
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-
-const cryptoData = [
-    { name: 'Bitcoin', ticker: 'BTC', price: '68,500.25', change: 3.50, volume: '12.2B', sparklineData: [30, 40, 20, 50, 45, 60, 55] },
-    { name: 'Ripple', ticker: 'XRP', price: '0.55', change: -1.80, volume: '22.1B', sparklineData: [40, 35, 50, 42, 38, 30, 25] },
-    { name: 'Solana', ticker: 'SOL', price: '180.30', change: 7.10, volume: '3.8B', sparklineData: [20, 30, 25, 45, 50, 65, 70] },
-    { name: 'Cardano', ticker: 'ADA', price: '0.40', change: -0.99, volume: '0.9B', sparklineData: [60, 55, 40, 45, 30, 20, 25] },
-];
-
-const newsData = [
-    {
-        title: 'Азиатские акции снижаются вслед за ослаблением Уолл-стрит на фоне потерь в технологическом секторе',
-        source: 'Investing.com',
-        excerpt: 'Большинство азиатских акций снизились в среду вслед за ночными потерями на Уолл-стрит на фоне растущей неопределенности относительно траектории процентных ставок США, при этом технологические акции продолжили терять позиции после сильного ралли в последние недели.',
-    },
-    {
-        title: 'Топ-5 золотых акций, за которыми стоит следить при рекордных ценах на золото: мнение UBS',
-        source: 'Investing.com',
-        excerpt: 'Investing.com -- Акции золотодобывающих компаний демонстрируют различные результаты в последние месяцы, при этом несколько компаний позиционируют себя для получения высокой доходности в будущем на фоне того, что цены на золото торгуются вблизи рекордных максимумов.',
-    },
-];
+import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange } from './api';
 
 const calculationHistory = [
     { id: 1, description: 'Пополнение баланса', date: '2024-07-25', amount: '+50.00 USD', type: 'deposit' },
@@ -36,7 +13,7 @@ const calculationHistory = [
     { id: 6, description: 'Покупка SOL', date: '2024-07-20', amount: '-75.00 USD', type: 'withdrawal' },
 ];
 
-const Header = ({ activePage, setActivePage, onProfileClick }) => (
+const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
     <header className="app-header">
         <div className="header-left">
             <div className="logo">
@@ -97,99 +74,236 @@ const Sparkline = ({ data, positive }) => {
     );
 };
 
-const CryptoDashboard = () => (
-    <main className="main-content">
-        <div className="filters-container">
-            <div className="search-bar">
-                <span className="search-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </span>
-                <input type="text" placeholder="Найти монету..." />
-            </div>
-            <button className="filter-button">Категория</button>
-            <button className="filter-button">Сортировать</button>
-            <button className="filter-button">Популярность</button>
-        </div>
+const CryptoDashboard = () => {
+    const [cryptocurrencies, setCryptocurrencies] = useState<Cryptocurrency[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
 
-        <div className="table-container">
-            <span className="last-updated">Последнее обновление</span>
-            <table className="crypto-table">
-                <thead>
-                    <tr>
-                        <th>Имя</th>
-                        <th>Тикер</th>
-                        <th>Цена (USD)</th>
-                        <th>24h %</th>
-                        <th>Объем (USD)</th>
-                        <th>График за 7 дней</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {cryptoData.map((coin, index) => (
-                        <tr key={index}>
-                            <td>
-                                <div className="crypto-name">
-                                    <span>{coin.name}</span>
-                                </div>
-                            </td>
-                            <td>{coin.ticker}</td>
-                            <td>${coin.price}</td>
-                            <td className={coin.change >= 0 ? 'positive' : 'negative'}>
-                                {coin.change >= 0 ? '+' : ''}{coin.change.toFixed(2)}%
-                            </td>
-                            <td>${coin.volume}</td>
-                            <td>
-                                <Sparkline data={coin.sparklineData} positive={coin.change >= 0} />
-                            </td>
+    useEffect(() => {
+        const loadCryptocurrencies = async () => {
+            try {
+                setLoading(true);
+                setError('');
+                const response = await api.getCryptocurrencies();
+                setCryptocurrencies(response.cryptocurrencies || []);
+            } catch (err: any) {
+                setError(err.message || 'Ошибка загрузки криптовалют');
+                console.error('Error loading cryptocurrencies:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadCryptocurrencies();
+    }, []);
+
+    const filteredCrypto = cryptocurrencies.filter(coin =>
+        coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        coin.pair.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка криптовалют...</div>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'red', textAlign: 'center', padding: '40px' }}>Ошибка: {error}</div>
+            </main>
+        );
+    }
+
+    return (
+        <main className="main-content">
+            <div className="filters-container">
+                <div className="search-bar">
+                    <span className="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Найти монету..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <button className="filter-button">Категория</button>
+                <button className="filter-button">Сортировать</button>
+                <button className="filter-button">Популярность</button>
+            </div>
+
+            <div className="table-container">
+                <span className="last-updated">Всего криптовалют: {filteredCrypto.length}</span>
+                <table className="crypto-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Пара</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-
-        <div className="pagination">
-            <button className="page-btn active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">3</button>
-            <button className="page-btn">&rarr;</button>
-        </div>
-    </main>
-);
-
-const NewsDashboard = () => (
-    <main className="main-content">
-        <div className="news-grid">
-            {newsData.map((article, index) => (
-                <div className="news-card" key={index}>
-                    <h2>{article.title}</h2>
-                    <p className="news-excerpt">{article.excerpt}</p>
-                    <span className="news-source">{article.source}</span>
-                </div>
-            ))}
-        </div>
-    </main>
-);
-
-const ProfilePage = ({ onBackClick, onLogout }) => (
-    <div className="profile-page">
-        <header className="profile-header">
-            <button className="back-button" onClick={onBackClick} aria-label="Go back">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-            </button>
-            <div className="balance-info">25USD</div>
-        </header>
-        <main className="profile-main">
-            <div className="profile-content">
-                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop" alt="User Avatar" className="profile-avatar-large" />
-                <h1 className="profile-greeting">Добрый день, Альберт</h1>
-                <div className="portfolio-calculator">
-                    <label htmlFor="portfolio-input">Рассчитать портфель</label>
-                    <div className="input-line"></div>
-                </div>
-                <button className="logout-button" onClick={onLogout}>Выйти</button>
+                    </thead>
+                    <tbody>
+                        {filteredCrypto.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
+                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredCrypto.map((coin) => (
+                                <tr key={coin.id}>
+                                    <td>{coin.id}</td>
+                                    <td>
+                                        <div className="crypto-name">
+                                            <span>{coin.name}</span>
+                                        </div>
+                                    </td>
+                                    <td>{coin.pair}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
+
+            <div className="pagination">
+                <button className="page-btn active">1</button>
+            </div>
+        </main>
+    );
+};
+
+const NewsDashboard = () => {
+    const [news, setNews] = useState<NewsItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string>('');
+
+    useEffect(() => {
+        const loadNews = async () => {
+            try {
+                setLoading(true);
+                setError('');
+                const response = await api.getNews();
+                setNews(response.news || []);
+            } catch (err: any) {
+                setError(err.message || 'Ошибка загрузки новостей');
+                console.error('Error loading news:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadNews();
+    }, []);
+
+    if (loading) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка новостей...</div>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'red', textAlign: 'center', padding: '40px' }}>Ошибка: {error}</div>
+            </main>
+        );
+    }
+
+    return (
+        <main className="main-content">
+            <div className="news-grid">
+                {news.length === 0 ? (
+                    <div style={{ color: 'white', textAlign: 'center', padding: '40px', gridColumn: '1 / -1' }}>
+                        Новостей пока нет
+                    </div>
+                ) : (
+                    news.map((article) => (
+                        <div className="news-card" key={article.id}>
+                            {article.photo && (
+                                <img
+                                    src={`data:image/jpeg;base64,${article.photo}`}
+                                    alt={article.title}
+                                    style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', marginBottom: '10px', borderRadius: '8px' }}
+                                />
+                            )}
+                            <h2>{article.title}</h2>
+                            <p className="news-excerpt">
+                                {article.content.length > 200
+                                    ? `${article.content.substring(0, 200)}...`
+                                    : article.content}
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                <span className="news-source">{article.user_login}</span>
+                                {article.published_at && (
+                                    <span style={{ color: '#888', fontSize: '12px' }}>
+                                        {new Date(article.published_at).toLocaleDateString('ru-RU')}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </main>
+    );
+};
+
+const ProfilePage = ({ onBackClick, onLogout, user }) => {
+    const [profileData, setProfileData] = useState<User | null>(user);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            if (tokenStorage.getAccessToken()) {
+                try {
+                    setLoading(true);
+                    const profile = await api.getProfile();
+                    setProfileData(profile);
+                } catch (error) {
+                    console.error('Ошибка загрузки профиля:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        loadProfile();
+    }, []);
+
+    const userName = profileData?.login || 'Пользователь';
+
+    return (
+        <div className="profile-page">
+            <header className="profile-header">
+                <button className="back-button" onClick={onBackClick} aria-label="Go back">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+                <div className="balance-info">25USD</div>
+            </header>
+            <main className="profile-main">
+                <div className="profile-content">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop" alt="User Avatar" className="profile-avatar-large" />
+                    <h1 className="profile-greeting">Добрый день, {loading ? 'Загрузка...' : userName}</h1>
+                    {profileData && (
+                        <div style={{ color: 'white', marginBottom: '10px', fontSize: '14px' }}>
+                            <div>Email: {profileData.email}</div>
+                            <div>Роль: {profileData.role}</div>
+                        </div>
+                    )}
+                    <div className="portfolio-calculator">
+                        <label htmlFor="portfolio-input">Рассчитать портфель</label>
+                        <div className="input-line"></div>
+                    </div>
+                    <button className="logout-button" onClick={onLogout}>Выйти</button>
+                </div>
 
             <div className="calculation-history">
                 <div className="history-header">
@@ -220,10 +334,117 @@ const ProfilePage = ({ onBackClick, onLogout }) => (
             </svg>
         </footer>
     </div>
-);
+    );
+};
 
 
-const FinanceApp = ({ onLogout }) => {
+const ExchangesDashboard = () => {
+    const [exchanges, setExchanges] = useState<Exchange[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const loadExchanges = async () => {
+            try {
+                setLoading(true);
+                setError('');
+                const response = await api.getExchanges();
+                setExchanges(response.exchanges || []);
+            } catch (err: any) {
+                setError(err.message || 'Ошибка загрузки бирж');
+                console.error('Error loading exchanges:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadExchanges();
+    }, []);
+
+    const filteredExchanges = exchanges.filter(exchange =>
+        exchange.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка бирж...</div>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'red', textAlign: 'center', padding: '40px' }}>Ошибка: {error}</div>
+            </main>
+        );
+    }
+
+    return (
+        <main className="main-content">
+            <div className="filters-container">
+                <div className="search-bar">
+                    <span className="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Найти биржу..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <button className="filter-button">Сортировать</button>
+                <button className="filter-button">Рейтинг</button>
+            </div>
+
+            <div className="table-container">
+                <span className="last-updated">Всего бирж: {filteredExchanges.length}</span>
+                <table className="crypto-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Торговый объем</th>
+                            <th>Монет на бирже</th>
+                            <th>Рейтинг</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredExchanges.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
+                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredExchanges.map((exchange) => (
+                                <tr key={exchange.id}>
+                                    <td>{exchange.id}</td>
+                                    <td>
+                                        <div className="crypto-name">
+                                            <span>{exchange.name}</span>
+                                        </div>
+                                    </td>
+                                    <td>{exchange.trading_volume}</td>
+                                    <td>{exchange.coins_listed}</td>
+                                    <td>{exchange.rating}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="pagination">
+                <button className="page-btn active">1</button>
+            </div>
+        </main>
+    );
+};
+
+const FinanceApp = ({ onLogout, user }) => {
     const [activePage, setActivePage] = useState('crypto');
     const [view, setView] = useState('dashboard');
 
@@ -231,8 +452,9 @@ const FinanceApp = ({ onLogout }) => {
         switch (activePage) {
             case 'news':
                 return <NewsDashboard />;
-            case 'crypto':
             case 'exchanges':
+                return <ExchangesDashboard />;
+            case 'crypto':
                 return <CryptoDashboard />;
             default:
                 return <CryptoDashboard />;
@@ -240,35 +462,102 @@ const FinanceApp = ({ onLogout }) => {
     };
 
     if (view === 'profile') {
-        return <ProfilePage onBackClick={() => setView('dashboard')} onLogout={onLogout} />;
+        return <ProfilePage onBackClick={() => setView('dashboard')} onLogout={onLogout} user={user} />;
     }
 
     return (
         <div className="app-container">
-            <Header activePage={activePage} setActivePage={setActivePage} onProfileClick={() => setView('profile')} />
+            <Header activePage={activePage} setActivePage={setActivePage} onProfileClick={() => setView('profile')} user={user} />
             {renderPage()}
         </div>
     );
 };
 
-const LoginForm = ({ onLogin }) => (
-    <form className="auth-form" onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
-        <input className="auth-input" type="email" placeholder="Почта..." required />
-        <input className="auth-input" type="password" placeholder="Пароль..." required />
-        <button className="auth-button" type="submit">Войти</button>
-    </form>
-);
+const LoginForm = ({ onLogin, error, loading }) => {
+    const [loginValue, setLoginValue] = useState('');
+    const [password, setPassword] = useState('');
 
-const RegisterForm = ({ onRegister }) => (
-    <form className="auth-form" onSubmit={(e) => { e.preventDefault(); onRegister(); }}>
-        <input className="auth-input" type="email" placeholder="Почта..." required />
-        <input className="auth-input" type="text" placeholder="Логин..." required />
-        <input className="auth-input" type="password" placeholder="Пароль..." required />
-        <button className="auth-button" type="submit">Зарегистрироваться</button>
-    </form>
-);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await onLogin(loginValue, password);
+    };
 
-const AuthPage = ({ onLogin, onRegister }) => {
+    return (
+        <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div style={{ color: 'red', marginBottom: '10px', fontSize: '14px' }}>{error}</div>}
+            <input
+                className="auth-input"
+                type="text"
+                placeholder="Логин или email..."
+                value={loginValue}
+                onChange={(e) => setLoginValue(e.target.value)}
+                required
+                disabled={loading}
+            />
+            <input
+                className="auth-input"
+                type="password"
+                placeholder="Пароль..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+            />
+            <button className="auth-button" type="submit" disabled={loading}>
+                {loading ? 'Вход...' : 'Войти'}
+            </button>
+        </form>
+    );
+};
+
+const RegisterForm = ({ onRegister, error, loading }) => {
+    const [email, setEmail] = useState('');
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await onRegister(email, login, password);
+    };
+
+    return (
+        <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div style={{ color: 'red', marginBottom: '10px', fontSize: '14px' }}>{error}</div>}
+            <input
+                className="auth-input"
+                type="email"
+                placeholder="Почта..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+            />
+            <input
+                className="auth-input"
+                type="text"
+                placeholder="Логин..."
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
+                required
+                disabled={loading}
+            />
+            <input
+                className="auth-input"
+                type="password"
+                placeholder="Пароль..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+            />
+            <button className="auth-button" type="submit" disabled={loading}>
+                {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            </button>
+        </form>
+    );
+};
+
+const AuthPage = ({ onLogin, onRegister, loginError, registerError, loginLoading, registerLoading }) => {
     const [isLoginView, setIsLoginView] = useState(true);
 
     return (
@@ -282,10 +571,14 @@ const AuthPage = ({ onLogin, onRegister }) => {
                     </div>
                 </div>
                 <h1 className="auth-title">{isLoginView ? 'Вход' : 'Регистрация'}</h1>
-                {isLoginView ? <LoginForm onLogin={onLogin} /> : <RegisterForm onRegister={onRegister} />}
+                {isLoginView ? (
+                    <LoginForm onLogin={onLogin} error={loginError} loading={loginLoading} />
+                ) : (
+                    <RegisterForm onRegister={onRegister} error={registerError} loading={registerLoading} />
+                )}
                 <p className="auth-toggle">
                     {isLoginView ? 'Нет аккаунта? ' : 'Уже есть аккаунт? '}
-                    <span onClick={() => setIsLoginView(!isLoginView)}>
+                    <span onClick={() => setIsLoginView(!isLoginView)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
                         {isLoginView ? 'Зарегистрироваться' : 'Войти'}
                     </span>
                 </p>
@@ -296,24 +589,101 @@ const AuthPage = ({ onLogin, onRegister }) => {
 
 const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+    const [loginError, setLoginError] = useState<string>('');
+    const [registerError, setRegisterError] = useState<string>('');
+    const [loginLoading, setLoginLoading] = useState(false);
+    const [registerLoading, setRegisterLoading] = useState(false);
+    const [checkingAuth, setCheckingAuth] = useState(true);
 
-    const handleLogin = () => {
-        setIsAuthenticated(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            const storedUser = tokenStorage.getUser();
+            const accessToken = tokenStorage.getAccessToken();
+
+            if (accessToken && storedUser) {
+                try {
+                    const profile = await api.getProfile();
+                    setUser(profile);
+                    setIsAuthenticated(true);
+                } catch (error) {
+                    tokenStorage.clearTokens();
+                    setUser(null);
+                    setIsAuthenticated(false);
+                }
+            }
+            setCheckingAuth(false);
+        };
+        checkAuth();
+    }, []);
+
+    const handleLogin = async (loginOrEmail: string, password: string) => {
+        setLoginError('');
+        setLoginLoading(true);
+
+        try {
+            const response = await api.login({ login: loginOrEmail, password });
+            setUser(response.user);
+            setIsAuthenticated(true);
+        } catch (error: any) {
+            setLoginError(error.message || 'Ошибка входа. Проверьте данные.');
+            setIsAuthenticated(false);
+        } finally {
+            setLoginLoading(false);
+        }
     };
 
-    const handleRegister = () => {
-        setIsAuthenticated(true);
+    const handleRegister = async (email: string, login: string, password: string) => {
+        setRegisterError('');
+        setRegisterLoading(true);
+
+        try {
+            const response = await api.register({ email, login, password });
+            setRegisterError(`Регистрация успешна! Проверьте почту ${email} для подтверждения аккаунта.`);
+            setTimeout(() => {
+                setRegisterError('');
+            }, 5000);
+        } catch (error: any) {
+            setRegisterError(error.message || 'Ошибка регистрации. Попробуйте снова.');
+        } finally {
+            setRegisterLoading(false);
+        }
     };
 
-    const handleLogout = () => {
-        setIsAuthenticated(false);
+    const handleLogout = async () => {
+        try {
+            await api.logout();
+        } catch (error) {
+            console.error('Ошибка при выходе:', error);
+        } finally {
+            tokenStorage.clearTokens();
+            setUser(null);
+            setIsAuthenticated(false);
+        }
     };
 
-    if (!isAuthenticated) {
-        return <AuthPage onLogin={handleLogin} onRegister={handleRegister} />;
+    if (checkingAuth) {
+        return (
+            <div className="auth-container">
+                <div style={{ color: 'white', textAlign: 'center' }}>Загрузка...</div>
+            </div>
+        );
     }
 
-    return <FinanceApp onLogout={handleLogout} />;
+    if (!isAuthenticated) {
+        return (
+            <AuthPage
+                onLogin={handleLogin}
+                onRegister={handleRegister}
+                loginError={loginError}
+                registerError={registerError}
+                loginLoading={loginLoading}
+                registerLoading={registerLoading}
+            />
+        );
+    }
+
+    return <FinanceApp onLogout={handleLogout} user={user} />;
 };
 
 const rootElement = document.getElementById('root');
