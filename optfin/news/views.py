@@ -124,8 +124,8 @@ def get_or_create_news(request):
             return Response({"error": "Failed to create news"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['GET', 'PUT', 'PATCH'])
-def get_or_update_news(request, news_id):
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+def get_delete_update_news(request, news_id):
     """Получить или обновить новость по ID"""
     try:
         news = get_object_or_404(News, id=news_id)
@@ -140,7 +140,6 @@ def get_or_update_news(request, news_id):
             from registration.jwt_utils import verify_token
             from registration.models import User
 
-            # Проверка аутентификации
             auth_header = request.META.get('HTTP_AUTHORIZATION', '')
             if not auth_header.startswith('Bearer '):
                 return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -198,6 +197,41 @@ def get_or_update_news(request, news_id):
                 "message": "News updated successfully",
                 "news": serialize_news(news)
             })
+        elif request.method == 'DELETE':
+            from registration.jwt_utils import verify_token
+            from registration.models import User
+
+            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            if not auth_header.startswith('Bearer '):
+                return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            token = auth_header.split(' ')[1]
+            payload = verify_token(token)
+
+            if not payload or payload.get('type') != 'access':
+                return Response({"error": "Invalid or expired token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            try:
+                user = User.objects.get(id=payload['user_id'])
+            except User.DoesNotExist:
+                return Response({"error": "User not found"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            if not user.is_active:
+                return Response({"error": "Email not confirmed"}, status=status.HTTP_403_FORBIDDEN)
+
+            # Проверка прав: автор новости или админ
+            if news.user_id.id != user.id and user.role != 'admin':
+                logger.warning(f"User {user.id} tried to delete news {news_id} without permission")
+                return Response({"error": "Permission denied. You can only delete your own news."},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            news.delete()
+            logger.info(f"News {news_id} deleted by user {user.id}")
+            return Response({
+                "status": "ok",
+                "message": "News deleted successfully"
+            })
+
     except Exception as e:
         if request.method == 'GET':
             logger.error(f"Error getting news {news_id}: {e}")
