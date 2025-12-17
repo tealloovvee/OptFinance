@@ -166,3 +166,96 @@ connector: <aiohttp.connector.TCPConnector object at 0x7f729b647b60>
 2025-12-10 15:13:28,796 ERROR cryptocurrencies.views Error message
 2025-12-10 15:13:28,853 ERROR exchanges.views Error message
 2025-12-10 15:13:28,911 ERROR telegramChat.views Error message
+2025-12-10 15:26:56,039 ERROR registration.views Error message
+2025-12-10 15:26:56,075 ERROR news.views Error message
+2025-12-10 15:26:56,113 ERROR cryptocurrencies.views Error message
+2025-12-10 15:26:56,143 ERROR exchanges.views Error message
+2025-12-10 15:26:56,170 ERROR telegramChat.views Error message
+2025-12-10 15:27:18,413 ERROR registration.views Error message
+2025-12-10 15:27:18,454 ERROR news.views Error message
+2025-12-10 15:27:18,495 ERROR cryptocurrencies.views Error message
+2025-12-10 15:27:18,538 ERROR exchanges.views Error message
+2025-12-10 15:27:18,583 ERROR telegramChat.views Error message
+2025-12-16 19:14:11,797 ERROR registration.views Error message
+2025-12-16 19:14:11,875 ERROR news.views Error message
+2025-12-16 19:14:11,934 ERROR cryptocurrencies.views Error message
+2025-12-16 19:14:11,992 ERROR exchanges.views Error message
+2025-12-16 19:14:12,052 ERROR telegramChat.views Error message
+2025-12-16 19:19:23,066 ERROR registration.views Error message
+2025-12-16 19:19:23,087 ERROR news.views Error message
+2025-12-16 19:19:23,107 ERROR cryptocurrencies.views Error message
+2025-12-16 19:19:23,125 ERROR exchanges.views Error message
+2025-12-16 19:19:23,143 ERROR telegramChat.views Error message
+2025-12-16 19:19:23,363 ERROR registration.views Error during registration: column "is_active" of relation "registration_user" does not exist
+LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
+                                                             ^
+
+2025-12-16 19:19:23,367 ERROR django.request Internal Server Error: /registration/auth/register/
+2025-12-16 19:20:31,079 ERROR registration.views Error during registration: column "is_active" of relation "registration_user" does not exist
+LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
+                                                             ^
+
+2025-12-16 19:20:31,082 ERROR django.request Internal Server Error: /registration/auth/register/
+2025-12-16 19:23:43,930 ERROR registration.views Error message
+2025-12-16 19:23:43,955 ERROR news.views Error message
+2025-12-16 19:23:43,973 ERROR cryptocurrencies.views Error message
+2025-12-16 19:23:43,989 ERROR exchanges.views Error message
+2025-12-16 19:23:44,004 ERROR telegramChat.views Error message
+2025-12-16 19:23:46,412 ERROR registration.views Error message
+2025-12-16 19:23:46,437 ERROR news.views Error message
+2025-12-16 19:23:46,460 ERROR cryptocurrencies.views Error message
+2025-12-16 19:23:46,483 ERROR exchanges.views Error message
+2025-12-16 19:23:46,504 ERROR telegramChat.views Error message
+2025-12-16 19:24:26,527 ERROR registration.views Error message
+2025-12-16 19:24:26,535 ERROR news.views Error message
+2025-12-16 19:24:26,543 ERROR cryptocurrencies.views Error message
+2025-12-16 19:24:26,550 ERROR exchanges.views Error message
+2025-12-16 19:24:26,557 ERROR telegramChat.views Error message
+2025-12-16 19:24:46,622 ERROR registration.views Error message
+2025-12-16 19:24:46,632 ERROR news.views Error message
+2025-12-16 19:24:46,639 ERROR cryptocurrencies.views Error message
+2025-12-16 19:24:46,647 ERROR exchanges.views Error message
+2025-12-16 19:24:46,654 ERROR telegramChat.views Error message
+2025-12-16 19:25:07,997 ERROR registration.views Error message
+2025-12-16 19:25:08,011 ERROR news.views Error message
+2025-12-16 19:25:08,024 ERROR cryptocurrencies.views Error message
+2025-12-16 19:25:08,037 ERROR exchanges.views Error message
+2025-12-16 19:25:08,046 ERROR telegramChat.views Error message
+2025-12-16 19:27:28,548 ERROR registration.views Error message
+2025-12-16 19:27:28,557 ERROR news.views Error message
+2025-12-16 19:27:28,564 ERROR cryptocurrencies.views Error message
+2025-12-16 19:27:28,571 ERROR exchanges.views Error message
+2025-12-16 19:27:28,578 ERROR telegramChat.views Error message
+2025-12-16 19:27:28,828 ERROR registration.views Error during registration: registration/email_confirmation.html
+2025-12-16 19:27:28,829 ERROR django.request Internal Server Error: /registration/auth/register/
+2025-12-16 19:58:47,585 ERROR registration.views Error message
+2025-12-16 19:58:47,617 ERROR news.views Error message
+2025-12-16 19:58:47,631 ERROR cryptocurrencies.views Error message
+2025-12-16 19:58:47,647 ERROR exchanges.views Error message
+2025-12-16 19:58:47,673 ERROR telegramChat.views Error message
+2025-12-16 19:59:28,419 ERROR registration.views Error message
+2025-12-16 19:59:28,433 ERROR news.views Error message
+2025-12-16 19:59:28,445 ERROR cryptocurrencies.views Error message
+2025-12-16 19:59:28,456 ERROR exchanges.views Error message
+2025-12-16 19:59:28,467 ERROR telegramChat.views Error message
+2025-12-16 20:00:10,676 ERROR registration.views Failed to send confirmation email: 'ascii' codec can't encode characters in position 20-22: ordinal not in range(128)
+2025-12-16 20:11:45,042 ERROR registration.views Error message
+2025-12-16 20:11:45,061 ERROR news.views Error message
+2025-12-16 20:11:45,077 ERROR cryptocurrencies.views Error message
+2025-12-16 20:11:45,094 ERROR exchanges.views Error message
+2025-12-16 20:11:45,112 ERROR telegramChat.views Error message
+2025-12-16 20:13:04,303 ERROR registration.views Error message
+2025-12-16 20:13:04,342 ERROR news.views Error message
+2025-12-16 20:13:04,381 ERROR cryptocurrencies.views Error message
+2025-12-16 20:13:04,447 ERROR exchanges.views Error message
+2025-12-16 20:13:04,484 ERROR telegramChat.views Error message
+2025-12-17 10:14:20,887 ERROR registration.views Error message
+2025-12-17 10:14:20,911 ERROR news.views Error message
+2025-12-17 10:14:20,944 ERROR cryptocurrencies.views Error message
+2025-12-17 10:14:20,963 ERROR exchanges.views Error message
+2025-12-17 10:14:20,988 ERROR telegramChat.views Error message
+2025-12-17 10:15:27,499 ERROR registration.views Error message
+2025-12-17 10:15:27,513 ERROR news.views Error message
+2025-12-17 10:15:27,531 ERROR cryptocurrencies.views Error message
+2025-12-17 10:15:27,576 ERROR exchanges.views Error message
+2025-12-17 10:15:27,610 ERROR telegramChat.views Error message

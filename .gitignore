@@ -1,1 +1,4 @@
 optfin/logs/*
+
+.env
+.env.docker

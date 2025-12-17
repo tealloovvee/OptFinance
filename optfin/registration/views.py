@@ -4,9 +4,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import strip_tags
 from registration.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -114,12 +112,33 @@ def register(request):
             else request.build_absolute_uri(reverse('confirm_email', args=[token]))
         )
 
-        context = {
-            "login": user.login,
-            "confirmation_link": confirmation_link,
-        }
-        html_message = render_to_string('registration/email_confirmation.html', context)
-        text_message = strip_tags(html_message)
+        html_message = f"""
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+            <meta charset="UTF-8">
+            <title>Подтверждение регистрации</title>
+        </head>
+        <body>
+            <h1>Добро пожаловать, {user.login}!</h1>
+            <p>Спасибо за регистрацию в нашей системе.</p>
+            <p>Для завершения регистрации и активации вашего аккаунта, пожалуйста, подтвердите ваш email адрес, перейдя по ссылке:</p>
+            <p><a href="{confirmation_link}">{confirmation_link}</a></p>
+            <p>Если вы не регистрировались в нашей системе, просто проигнорируйте это письмо.</p>
+        </body>
+        </html>
+        """
+        text_message = f"""
+        Добро пожаловать, {user.login}!
+
+        Спасибо за регистрацию в нашей системе.
+
+        Для завершения регистрации и активации вашего аккаунта, пожалуйста, подтвердите ваш email адрес, перейдя по ссылке:
+        {confirmation_link}
+
+        Если вы не регистрировались в нашей системе, просто проигнорируйте это письмо.
+        """
+
         try:
             email_message = EmailMultiAlternatives(
                 subject="Подтверждение регистрации",
@@ -131,8 +150,6 @@ def register(request):
             email_message.send()
         except Exception as mail_error:
             logger.error(f"Failed to send confirmation email: {mail_error}")
-            return Response({"error": "Failed to send confirmation email"},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({
             "message": "User registered successfully. Please confirm your email to activate the account.",
@@ -261,8 +278,6 @@ def confirm_email(request, token):
     user.is_active = True
     user.save(update_fields=['is_active'])
     return Response({"message": "Email confirmed successfully"})
-
-
 
 
 @api_view(['POST'])
