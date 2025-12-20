@@ -2,9 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange } from './api';
+import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange, type Portfolio } from './api';
 
-const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
+const Header = ({ activePage, setActivePage, onProfileClick, user }) => {
+    const avatarSrc = user?.profile_image 
+        ? `data:image/jpeg;base64,${user.profile_image}`
+        : 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop';
+    
+    return (
     <header className="app-header">
         <div className="header-left">
             <div className="logo">
@@ -15,15 +20,16 @@ const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
                 </div>
                 <span>OptFinance</span>
             </div>
-            <nav>
-                <a href="#" className={activePage === 'exchanges' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('exchanges'); }}>Биржи</a>
-                <a href="#" className={activePage === 'news' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('news'); }}>Новости</a>
-                <a href="#" className={activePage === 'crypto' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('crypto'); }}>Криптовалюты</a>
-            </nav>
+                <nav>
+                    <a href="#" className={activePage === 'exchanges' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('exchanges'); }}>Биржи</a>
+                    <a href="#" className={activePage === 'portfolios' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('portfolios'); }}>Портфели</a>
+                    <a href="#" className={activePage === 'news' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('news'); }}>Новости</a>
+                    <a href="#" className={activePage === 'crypto' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('crypto'); }}>Криптовалюты</a>
+                </nav>
         </div>
         <div className="header-right">
             <img
-                src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop"
+                    src={avatarSrc}
                 alt="User Avatar"
                 className="profile-avatar"
                 onClick={onProfileClick}
@@ -31,6 +37,7 @@ const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
         </div>
     </header>
 );
+};
 
 const Sparkline = ({ data, positive }) => {
     const width = 100;
@@ -376,9 +383,11 @@ const NewsDashboard = () => {
     );
 };
 
-const ProfilePage = ({ onBackClick, onLogout, user }) => {
+const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
     const [profileData, setProfileData] = useState<User | null>(user);
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -397,7 +406,35 @@ const ProfilePage = ({ onBackClick, onLogout, user }) => {
         loadProfile();
     }, []);
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploading(true);
+            await api.uploadProfileImage(file);
+            // Перезагружаем профиль для получения обновленной аватарки
+            const profile = await api.getProfile();
+            setProfileData(profile);
+            // Обновляем user в родительском компоненте
+            if (onProfileUpdate) {
+                await onProfileUpdate();
+            }
+        } catch (error: any) {
+            console.error('Ошибка загрузки аватарки:', error);
+            alert(error.message || 'Ошибка загрузки аватарки');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
     const userName = profileData?.login || 'Пользователь';
+    const avatarSrc = profileData?.profile_image 
+        ? `data:image/jpeg;base64,${profileData.profile_image}`
+        : 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop';
 
     return (
         <div className="profile-page">
@@ -410,7 +447,46 @@ const ProfilePage = ({ onBackClick, onLogout, user }) => {
             </header>
             <main className="profile-main">
                 <div className="profile-content">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop" alt="User Avatar" className="profile-avatar-large" />
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <img 
+                            src={avatarSrc} 
+                            alt="User Avatar" 
+                            className="profile-avatar-large" 
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            style={{
+                                position: 'absolute',
+                                bottom: 0,
+                                right: 0,
+                                background: 'var(--accent-orange)',
+                                border: '2px solid var(--background-light)',
+                                borderRadius: '50%',
+                                width: '36px',
+                                height: '36px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: uploading ? 'not-allowed' : 'pointer',
+                                opacity: uploading ? 0.6 : 1,
+                            }}
+                            title="Изменить аватар"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            style={{ display: 'none' }}
+                        />
+                    </div>
                     <h1 className="profile-greeting">Добрый день, {loading ? 'Загрузка...' : userName}</h1>
                     {profileData && (
                         <div style={{ color: 'white', marginBottom: '10px', fontSize: '14px' }}>
@@ -418,10 +494,6 @@ const ProfilePage = ({ onBackClick, onLogout, user }) => {
                             <div>Роль: {profileData.role}</div>
                         </div>
                     )}
-                    <div className="portfolio-calculator">
-                        <label htmlFor="portfolio-input">Рассчитать портфель</label>
-                        <div className="input-line"></div>
-                    </div>
                     <button className="logout-button" onClick={onLogout}>Выйти</button>
                 </div>
         </main>
@@ -541,9 +613,256 @@ const ExchangesDashboard = () => {
     );
 };
 
-const FinanceApp = ({ onLogout, user }) => {
+const PortfoliosDashboard = () => {
+    const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [createRisk, setCreateRisk] = useState('');
+    const [createAnnualReturn, setCreateAnnualReturn] = useState('');
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createError, setCreateError] = useState<string>('');
+
+    useEffect(() => {
+        const loadPortfolios = async () => {
+            try {
+                setLoading(true);
+                setError('');
+                const response = await api.getPortfolios();
+                setPortfolios(response.portfolios || []);
+            } catch (err: any) {
+                setError(err.message || 'Ошибка загрузки портфелей');
+                console.error('Error loading portfolios:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadPortfolios();
+    }, []);
+
+    const handleCreatePortfolio = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!createRisk.trim()) {
+            setCreateError('Заполните поле риска');
+            return;
+        }
+
+        setCreateLoading(true);
+        setCreateError('');
+
+        try {
+            await api.createPortfolio({
+                risk: createRisk,
+                annual_return: createAnnualReturn ? parseFloat(createAnnualReturn) : undefined,
+            });
+            setCreateRisk('');
+            setCreateAnnualReturn('');
+            setShowCreateForm(false);
+            // Перезагружаем портфели
+            const response = await api.getPortfolios();
+            setPortfolios(response.portfolios || []);
+        } catch (err: any) {
+            setCreateError(err.message || 'Ошибка создания портфеля');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
+    const filteredPortfolios = portfolios.filter(portfolio =>
+        portfolio.risk.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка портфелей...</div>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="main-content">
+                <div style={{ color: 'red', textAlign: 'center', padding: '40px' }}>Ошибка: {error}</div>
+            </main>
+        );
+    }
+
+    return (
+        <main className="main-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Портфели</h1>
+                <button 
+                    className="filter-button" 
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Создать портфель
+                </button>
+            </div>
+
+            {showCreateForm && (
+                <div style={{ 
+                    background: 'var(--background-light)', 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '1rem', 
+                    padding: '1.5rem', 
+                    marginBottom: '1.5rem' 
+                }}>
+                    <form onSubmit={handleCreatePortfolio}>
+                        {createError && (
+                            <div style={{ color: 'red', marginBottom: '1rem', fontSize: '14px' }}>
+                                {createError}
+                            </div>
+                        )}
+                        <input
+                            type="text"
+                            placeholder="Риск (например: low, medium, high)..."
+                            value={createRisk}
+                            onChange={(e) => setCreateRisk(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'var(--background-dark)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '0.5rem',
+                                padding: '0.75rem 1rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '1rem',
+                                marginBottom: '1rem',
+                                boxSizing: 'border-box'
+                            }}
+                            disabled={createLoading}
+                            required
+                        />
+                        <input
+                            type="number"
+                            placeholder="Годовая доходность (%)..."
+                            value={createAnnualReturn}
+                            onChange={(e) => setCreateAnnualReturn(e.target.value)}
+                            step="0.01"
+                            style={{
+                                width: '100%',
+                                background: 'var(--background-dark)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '0.5rem',
+                                padding: '0.75rem 1rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '1rem',
+                                marginBottom: '1rem',
+                                boxSizing: 'border-box'
+                            }}
+                            disabled={createLoading}
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                className="filter-button"
+                                onClick={() => {
+                                    setShowCreateForm(false);
+                                    setCreateRisk('');
+                                    setCreateAnnualReturn('');
+                                    setCreateError('');
+                                }}
+                                disabled={createLoading}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                className="filter-button"
+                                style={{ 
+                                    background: 'var(--accent-orange)', 
+                                    borderColor: 'var(--accent-orange)',
+                                    color: 'var(--background-dark)',
+                                    fontWeight: 600
+                                }}
+                                disabled={createLoading}
+                            >
+                                {createLoading ? 'Создание...' : 'Создать'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            <div className="filters-container">
+                <div className="search-bar">
+                    <span className="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Найти портфель..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <button className="filter-button">Сортировать</button>
+                <button className="filter-button">Риск</button>
+            </div>
+
+            <div className="table-container">
+                <span className="last-updated">Всего портфелей: {filteredPortfolios.length}</span>
+                <table className="crypto-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Риск</th>
+                            <th>Годовая доходность</th>
+                            <th>Статус</th>
+                            <th>Дата создания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredPortfolios.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
+                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredPortfolios.map((portfolio) => (
+                                <tr key={portfolio.id}>
+                                    <td>{portfolio.id}</td>
+                                    <td>
+                                        <div className="crypto-name">
+                                            <span>{portfolio.risk}</span>
+                                        </div>
+                                    </td>
+                                    <td>{portfolio.annual_return}%</td>
+                                    <td>{portfolio.is_active ? 'Активен' : 'Неактивен'}</td>
+                                    <td>{new Date(portfolio.created_at).toLocaleDateString('ru-RU')}</td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="pagination">
+                <button className="page-btn active">1</button>
+            </div>
+        </main>
+    );
+};
+
+const FinanceApp = ({ onLogout, user, setUser }) => {
     const [activePage, setActivePage] = useState('crypto');
     const [view, setView] = useState('dashboard');
+
+    const handleProfileUpdate = async () => {
+        try {
+            const profile = await api.getProfile();
+            setUser(profile);
+        } catch (error) {
+            console.error('Ошибка обновления профиля:', error);
+        }
+    };
 
     const renderPage = () => {
         switch (activePage) {
@@ -551,6 +870,8 @@ const FinanceApp = ({ onLogout, user }) => {
                 return <NewsDashboard />;
             case 'exchanges':
                 return <ExchangesDashboard />;
+            case 'portfolios':
+                return <PortfoliosDashboard />;
             case 'crypto':
                 return <CryptoDashboard />;
             default:
@@ -559,7 +880,7 @@ const FinanceApp = ({ onLogout, user }) => {
     };
 
     if (view === 'profile') {
-        return <ProfilePage onBackClick={() => setView('dashboard')} onLogout={onLogout} user={user} />;
+        return <ProfilePage onBackClick={() => setView('dashboard')} onLogout={onLogout} user={user} onProfileUpdate={handleProfileUpdate} />;
     }
 
     return (
@@ -780,7 +1101,7 @@ const App = () => {
         );
     }
 
-    return <FinanceApp onLogout={handleLogout} user={user} />;
+    return <FinanceApp onLogout={handleLogout} user={user} setUser={setUser} />;
 };
 
 const rootElement = document.getElementById('root');
