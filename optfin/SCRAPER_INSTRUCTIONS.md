@@ -300,3 +300,4 @@ if ohlcv:
 3. Статус контейнеров: `docker compose ps`
 4. Подключение к БД: `docker compose exec db psql -U Nephilim -d optfindb`
 
+
