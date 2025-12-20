@@ -506,3 +506,31 @@ LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
 2025-12-20 16:43:36,065 INFO portfolios.views Retrieved 0 portfolios for user 1
 2025-12-20 16:43:50,257 INFO portfolios.views Retrieved 0 portfolios for user 1
 2025-12-20 16:43:57,277 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-20 16:54:17,802 INFO registration.views Info message
+2025-12-20 16:54:17,803 ERROR registration.views Error message
+2025-12-20 16:54:17,825 INFO news.views Info message
+2025-12-20 16:54:17,825 ERROR news.views Error message
+2025-12-20 16:54:17,839 INFO cryptocurrencies.views Info message
+2025-12-20 16:54:17,839 ERROR cryptocurrencies.views Error message
+2025-12-20 16:54:17,849 INFO exchanges.views Info message
+2025-12-20 16:54:17,849 ERROR exchanges.views Error message
+2025-12-20 16:54:17,860 INFO portfolios.views Info message
+2025-12-20 16:54:17,860 ERROR portfolios.views Error message
+2025-12-20 16:54:17,871 INFO telegramChat.views Info message
+2025-12-20 16:54:17,872 ERROR telegramChat.views Error message
+2025-12-20 16:55:29,361 INFO registration.views Info message
+2025-12-20 16:55:29,362 ERROR registration.views Error message
+2025-12-20 16:55:29,418 INFO news.views Info message
+2025-12-20 16:55:29,419 ERROR news.views Error message
+2025-12-20 16:55:29,482 INFO cryptocurrencies.views Info message
+2025-12-20 16:55:29,483 ERROR cryptocurrencies.views Error message
+2025-12-20 16:55:29,514 INFO exchanges.views Info message
+2025-12-20 16:55:29,515 ERROR exchanges.views Error message
+2025-12-20 16:55:29,542 INFO portfolios.views Info message
+2025-12-20 16:55:29,543 ERROR portfolios.views Error message
+2025-12-20 16:55:29,562 INFO telegramChat.views Info message
+2025-12-20 16:55:29,563 ERROR telegramChat.views Error message
+2025-12-20 16:55:29,659 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:55:41,338 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:55:48,521 INFO registration.views User updated: Nephilim
+2025-12-20 16:55:48,567 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies

@@ -7,3 +7,4 @@ urlpatterns = [
     path('<int:portfolio_id>/', views.get_portfolio, name='get_portfolio'),
 ]
 
+
