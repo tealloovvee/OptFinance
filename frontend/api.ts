@@ -20,6 +20,7 @@ export interface User {
   role: string;
   portfolios_created: Record<string, any>;
   created_at: string;
+  profile_image?: string | null;
 }
 
 export interface AuthResponse {
@@ -87,6 +88,27 @@ export interface CreateNewsData {
   content: string;
   photo?: string;
   published_at?: string;
+}
+
+export interface Portfolio {
+  id: number;
+  user_id: number;
+  user_login: string;
+  risk: string;
+  annual_return: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface PortfoliosResponse {
+  status: string;
+  count: number;
+  portfolios: Portfolio[];
+}
+
+export interface CreatePortfolioData {
+  risk: string;
+  annual_return?: number;
 }
 
 export const tokenStorage = {
@@ -235,6 +257,58 @@ export const api = {
     return response;
   },
 
+  updateProfile: async (data: { login?: string; email?: string; profile_image?: File }): Promise<User> => {
+    const formData = new FormData();
+    if (data.login) formData.append('login', data.login);
+    if (data.email) formData.append('email', data.email);
+    if (data.profile_image) formData.append('profile_image', data.profile_image);
+
+    const accessToken = tokenStorage.getAccessToken();
+    const response = await fetch(`${API_BASE_URL}/registration/users/${tokenStorage.getUser()?.id}/`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({
+        error: `HTTP ${response.status}: ${response.statusText}`,
+      }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    tokenStorage.setUser(result);
+    return result;
+  },
+
+  uploadProfileImage: async (file: File): Promise<{ message: string }> => {
+    const formData = new FormData();
+    formData.append('profile_image', file);
+
+    const accessToken = tokenStorage.getAccessToken();
+    const response = await fetch(`${API_BASE_URL}/registration/auth/upload-profile-image/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({
+        error: `HTTP ${response.status}: ${response.statusText}`,
+      }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  },
+
   refreshToken: async (): Promise<{ tokens: { access_token: string; refresh_token: string } }> => {
     const refreshToken = tokenStorage.getRefreshToken();
     if (!refreshToken) {
@@ -294,6 +368,21 @@ export const api = {
   updateNews: async (newsId: number, data: Partial<CreateNewsData>): Promise<SingleNewsResponse> => {
     return apiRequest<SingleNewsResponse>(`/news/${newsId}/`, {
       method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getPortfolios: async (): Promise<PortfoliosResponse> => {
+    return apiRequest<PortfoliosResponse>('/portfolios/');
+  },
+
+  getPortfolio: async (portfolioId: number): Promise<Portfolio> => {
+    return apiRequest<Portfolio>(`/portfolios/${portfolioId}/`);
+  },
+
+  createPortfolio: async (data: CreatePortfolioData): Promise<Portfolio> => {
+    return apiRequest<Portfolio>('/portfolios/create/', {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   },

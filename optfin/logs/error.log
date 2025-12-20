@@ -271,3 +271,15 @@ LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
 2025-12-20 13:16:17,110 ERROR telegramChat.views Error message
 2025-12-20 13:16:17,171 ERROR registration.views Error refreshing token: User matching query does not exist.
 2025-12-20 13:16:17,174 ERROR django.request Internal Server Error: /registration/auth/refresh/
+2025-12-20 16:41:45,802 ERROR registration.views Error message
+2025-12-20 16:41:45,824 ERROR news.views Error message
+2025-12-20 16:41:45,853 ERROR cryptocurrencies.views Error message
+2025-12-20 16:41:45,878 ERROR exchanges.views Error message
+2025-12-20 16:41:45,910 ERROR portfolios.views Error message
+2025-12-20 16:41:45,939 ERROR telegramChat.views Error message
+2025-12-20 16:42:38,020 ERROR registration.views Error message
+2025-12-20 16:42:38,074 ERROR news.views Error message
+2025-12-20 16:42:38,108 ERROR cryptocurrencies.views Error message
+2025-12-20 16:42:38,141 ERROR exchanges.views Error message
+2025-12-20 16:42:38,176 ERROR portfolios.views Error message
+2025-12-20 16:42:38,206 ERROR telegramChat.views Error message

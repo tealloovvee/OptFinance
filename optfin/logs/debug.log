@@ -626,3 +626,59 @@ LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
 2025-12-20 13:18:29,526 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
 2025-12-20 13:18:30,279 INFO news.views Retrieved 0 news items
 2025-12-20 13:18:30,783 INFO exchanges.views Retrieved 0 exchanges
+2025-12-20 16:41:45,800 DEBUG registration.views Debug message
+2025-12-20 16:41:45,801 INFO registration.views Info message
+2025-12-20 16:41:45,802 ERROR registration.views Error message
+2025-12-20 16:41:45,823 DEBUG news.views Debug message
+2025-12-20 16:41:45,823 INFO news.views Info message
+2025-12-20 16:41:45,824 ERROR news.views Error message
+2025-12-20 16:41:45,851 DEBUG cryptocurrencies.views Debug message
+2025-12-20 16:41:45,852 INFO cryptocurrencies.views Info message
+2025-12-20 16:41:45,853 ERROR cryptocurrencies.views Error message
+2025-12-20 16:41:45,877 DEBUG exchanges.views Debug message
+2025-12-20 16:41:45,877 INFO exchanges.views Info message
+2025-12-20 16:41:45,878 ERROR exchanges.views Error message
+2025-12-20 16:41:45,908 DEBUG portfolios.views Debug message
+2025-12-20 16:41:45,909 INFO portfolios.views Info message
+2025-12-20 16:41:45,910 ERROR portfolios.views Error message
+2025-12-20 16:41:45,938 DEBUG telegramChat.views Debug message
+2025-12-20 16:41:45,938 INFO telegramChat.views Info message
+2025-12-20 16:41:45,939 ERROR telegramChat.views Error message
+2025-12-20 16:42:38,017 DEBUG registration.views Debug message
+2025-12-20 16:42:38,018 INFO registration.views Info message
+2025-12-20 16:42:38,020 ERROR registration.views Error message
+2025-12-20 16:42:38,072 DEBUG news.views Debug message
+2025-12-20 16:42:38,073 INFO news.views Info message
+2025-12-20 16:42:38,074 ERROR news.views Error message
+2025-12-20 16:42:38,106 DEBUG cryptocurrencies.views Debug message
+2025-12-20 16:42:38,107 INFO cryptocurrencies.views Info message
+2025-12-20 16:42:38,108 ERROR cryptocurrencies.views Error message
+2025-12-20 16:42:38,140 DEBUG exchanges.views Debug message
+2025-12-20 16:42:38,140 INFO exchanges.views Info message
+2025-12-20 16:42:38,141 ERROR exchanges.views Error message
+2025-12-20 16:42:38,174 DEBUG portfolios.views Debug message
+2025-12-20 16:42:38,175 INFO portfolios.views Info message
+2025-12-20 16:42:38,176 ERROR portfolios.views Error message
+2025-12-20 16:42:38,205 DEBUG telegramChat.views Debug message
+2025-12-20 16:42:38,205 INFO telegramChat.views Info message
+2025-12-20 16:42:38,206 ERROR telegramChat.views Error message
+2025-12-20 16:42:38,233 WARNING django.request Unauthorized: /registration/auth/profile/
+2025-12-20 16:42:38,330 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:42:44,659 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:42:47,225 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-20 16:42:50,279 INFO exchanges.views Retrieved 0 exchanges
+2025-12-20 16:42:51,388 INFO news.views Retrieved 0 news items
+2025-12-20 16:42:51,787 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:42:52,530 INFO news.views Retrieved 0 news items
+2025-12-20 16:42:53,096 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:43:01,950 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:43:03,173 INFO exchanges.views Retrieved 0 exchanges
+2025-12-20 16:43:03,642 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-20 16:43:15,707 INFO exchanges.views Retrieved 0 exchanges
+2025-12-20 16:43:17,023 INFO news.views Retrieved 0 news items
+2025-12-20 16:43:17,585 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:43:19,955 INFO exchanges.views Retrieved 0 exchanges
+2025-12-20 16:43:34,019 INFO cryptocurrencies.views Retrieved 0 cryptocurrencies
+2025-12-20 16:43:36,065 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-20 16:43:50,257 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-20 16:43:57,277 INFO portfolios.views Retrieved 0 portfolios for user 1

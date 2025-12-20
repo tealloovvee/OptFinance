@@ -24,6 +24,7 @@ urlpatterns = [
     path('news/', include('news.urls')),
     path('cryptocurrencies/', include('cryptocurrencies.urls')),
     path('exchanges/', include('exchanges.urls')),
+    path('portfolios/', include('portfolios.urls')),
     path('', include('telegramChat.urls')),
 
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

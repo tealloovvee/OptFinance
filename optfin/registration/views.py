@@ -26,31 +26,44 @@ logger.error("Error message")
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @jwt_required
+@parser_classes([MultiPartParser, FormParser])
 def get_or_update_user(request, user_id):
     try:
         user = get_object_or_404(User, id=user_id)
 
         if request.method == 'GET':
+            profile_image = None
+            if user.profile_image:
+                profile_image = b64encode(user.profile_image).decode('utf-8')
             return Response({
                 "id": user.id,
                 "login": user.login,
                 "email": user.email,
                 "role": user.role,
                 "portfolios_created": user.portfolios_created,
-                "created_at": user.created_at.isoformat()
+                "created_at": user.created_at.isoformat(),
+                "profile_image": profile_image
             })
         elif request.method == 'PUT':
             data = request.data
             login = data.get('login')
             email = data.get('email')
+            profile_image_file = request.FILES.get('profile_image')
 
             if login:
                 user.login = login
             if email:
                 user.email = email
+            if profile_image_file:
+                user.profile_image = profile_image_file.read()
 
             user.save()
             logger.info(f"User updated: {user.login}")
+            
+            profile_image = None
+            if user.profile_image:
+                profile_image = b64encode(user.profile_image).decode('utf-8')
+            
             return Response({
                 "status": "ok",
                 "id": user.id,
@@ -58,7 +71,8 @@ def get_or_update_user(request, user_id):
                 "email": user.email,
                 "role": user.role,
                 "portfolios_created": user.portfolios_created,
-                "created_at": user.created_at.isoformat()
+                "created_at": user.created_at.isoformat(),
+                "profile_image": profile_image
             })
         elif request.method == 'DELETE':
             user.delete()
@@ -241,13 +255,17 @@ def refresh_token(request):
 @jwt_required
 def get_profile(request):
     user = request.user
+    profile_image = None
+    if user.profile_image:
+        profile_image = b64encode(user.profile_image).decode('utf-8')
     return Response({
         "id": user.id,
         "login": user.login,
         "email": user.email,
         "role": user.role,
         "portfolios_created": user.portfolios_created,
-        "created_at": user.created_at.isoformat()
+        "created_at": user.created_at.isoformat(),
+        "profile_image": profile_image
     })
 
 
