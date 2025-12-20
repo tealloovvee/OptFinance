@@ -1,13 +1,245 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange, type Portfolio } from './api';
+import { translations, type Language, getTranslation } from './locales';
 
-const Header = ({ activePage, setActivePage, onProfileClick, user }) => {
-    const avatarSrc = user?.profile_image 
-        ? `data:image/jpeg;base64,${user.profile_image}`
-        : 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop';
+type Theme = 'light' | 'dark';
+
+interface AppContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const AppContext = createContext<AppContextType | null>(null);
+
+const useApp = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useApp must be used within AppProvider');
+  }
+  return context;
+};
+
+const SettingsPage = ({ onBackClick, user, onProfileUpdate }) => {
+    const { t } = useApp();
+    const [email, setEmail] = useState(user?.email || '');
+    const [login, setLogin] = useState(user?.login || '');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string>('');
+
+    const handleSave = async () => {
+        if (!email.trim() || !login.trim()) {
+            setError('Заполните все поля');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            await api.updateProfile({ email, login });
+            if (onProfileUpdate) {
+                await onProfileUpdate();
+            }
+            onBackClick();
+        } catch (err: any) {
+            setError(err.message || 'Ошибка сохранения');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="profile-page">
+            <header className="profile-header">
+                <button className="back-button" onClick={onBackClick} aria-label="Go back">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </button>
+            </header>
+            <main className="profile-main">
+                <div className="profile-content">
+                    <h1 className="profile-greeting">{t('settings')}</h1>
+                    {error && (
+                        <div style={{ color: 'red', marginBottom: '1rem', fontSize: '14px' }}>
+                            {error}
+                        </div>
+                    )}
+                    <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                {t('email')}
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    background: 'var(--background-dark)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.75rem 1rem',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '1rem',
+                                    boxSizing: 'border-box'
+                                }}
+                                disabled={loading}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                {t('login')}
+                            </label>
+                            <input
+                                type="text"
+                                value={login}
+                                onChange={(e) => setLogin(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    background: 'var(--background-dark)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '0.5rem',
+                                    padding: '0.75rem 1rem',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '1rem',
+                                    boxSizing: 'border-box'
+                                }}
+                                disabled={loading}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                            <button
+                                className="filter-button"
+                                onClick={onBackClick}
+                                disabled={loading}
+                            >
+                                {t('cancel')}
+                            </button>
+                            <button
+                                className="filter-button"
+                                onClick={handleSave}
+                                disabled={loading}
+                                style={{
+                                    background: 'var(--accent-orange)',
+                                    borderColor: 'var(--accent-orange)',
+                                    color: 'var(--background-dark)',
+                                    fontWeight: 600
+                                }}
+                            >
+                                {loading ? t('loading') : t('save')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+};
+
+const ProfileDropdown = ({ user, onProfileClick, onSettingsClick, onClose }) => {
+    const { theme, setTheme, language, setLanguage, t } = useApp();
+    const [showDropdown, setShowDropdown] = useState(false);
+    const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+    const handleMouseEnter = () => {
+        hoverTimeoutRef.current = setTimeout(() => {
+            setShowDropdown(true);
+        }, 300);
+    };
+
+    const handleMouseLeave = () => {
+        if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+        }
+        setTimeout(() => {
+            setShowDropdown(false);
+        }, 200);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (hoverTimeoutRef.current) {
+                clearTimeout(hoverTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            className="profile-dropdown-container"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            <img
+                src={user?.profile_image 
+                    ? `data:image/jpeg;base64,${user.profile_image}`
+                    : 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop'}
+                alt="User Avatar"
+                className="profile-avatar"
+            />
+            {showDropdown && (
+                <div className={`profile-dropdown ${showDropdown ? 'show' : ''}`}>
+                    <div className="dropdown-item" onClick={onProfileClick}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>{t('profile')}</span>
+                    </div>
+                    <div className="dropdown-item" onClick={onSettingsClick}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"></path>
+                        </svg>
+                        <span>{t('settings')}</span>
+                    </div>
+                    <div className="dropdown-item dropdown-theme">
+                        <span>{t('theme')}</span>
+                        <div className="theme-toggle">
+                            <span className={theme === 'light' ? 'active' : ''}>{t('lightTheme')}</span>
+                            <label className="theme-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={theme === 'dark'}
+                                    onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')}
+                                />
+                                <span className="slider"></span>
+                            </label>
+                            <span className={theme === 'dark' ? 'active' : ''}>{t('darkTheme')}</span>
+                        </div>
+                    </div>
+                    <div className="dropdown-item dropdown-language">
+                        <span>{t('language')}</span>
+                        <div className="language-selector">
+                            <button
+                                className={language === 'ru' ? 'active' : ''}
+                                onClick={() => setLanguage('ru')}
+                            >
+                                Русский
+                            </button>
+                            <button
+                                className={language === 'en' ? 'active' : ''}
+                                onClick={() => setLanguage('en')}
+                            >
+                                English
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const Header = ({ activePage, setActivePage, onProfileClick, user, onSettingsClick }) => {
+    const { t } = useApp();
     
     return (
     <header className="app-header">
@@ -20,19 +252,19 @@ const Header = ({ activePage, setActivePage, onProfileClick, user }) => {
                 </div>
                 <span>OptFinance</span>
             </div>
-                <nav>
-                    <a href="#" className={activePage === 'exchanges' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('exchanges'); }}>Биржи</a>
-                    <a href="#" className={activePage === 'portfolios' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('portfolios'); }}>Портфели</a>
-                    <a href="#" className={activePage === 'news' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('news'); }}>Новости</a>
-                    <a href="#" className={activePage === 'crypto' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('crypto'); }}>Криптовалюты</a>
-                </nav>
+            <nav>
+                    <a href="#" className={activePage === 'exchanges' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('exchanges'); }}>{t('exchanges')}</a>
+                    <a href="#" className={activePage === 'portfolios' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('portfolios'); }}>{t('portfolios')}</a>
+                    <a href="#" className={activePage === 'news' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('news'); }}>{t('news')}</a>
+                    <a href="#" className={activePage === 'crypto' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('crypto'); }}>{t('cryptocurrencies')}</a>
+            </nav>
         </div>
         <div className="header-right">
-            <img
-                    src={avatarSrc}
-                alt="User Avatar"
-                className="profile-avatar"
-                onClick={onProfileClick}
+                <ProfileDropdown
+                    user={user}
+                    onProfileClick={onProfileClick}
+                    onSettingsClick={onSettingsClick}
+                    onClose={() => {}}
             />
         </div>
     </header>
@@ -69,6 +301,7 @@ const Sparkline = ({ data, positive }) => {
 };
 
 const CryptoDashboard = () => {
+    const { t } = useApp();
     const [cryptocurrencies, setCryptocurrencies] = useState<Cryptocurrency[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
@@ -99,7 +332,7 @@ const CryptoDashboard = () => {
     if (loading) {
         return (
             <main className="main-content">
-                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка криптовалют...</div>
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>{t('loadingCryptocurrencies')}</div>
             </main>
         );
     }
@@ -121,31 +354,31 @@ const CryptoDashboard = () => {
                     </span>
                     <input
                         type="text"
-                        placeholder="Найти монету..."
+                        placeholder={t('findCoin')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="filter-button">Категория</button>
-                <button className="filter-button">Сортировать</button>
-                <button className="filter-button">Популярность</button>
+                <button className="filter-button">{t('category')}</button>
+                <button className="filter-button">{t('sort')}</button>
+                <button className="filter-button">{t('popularity')}</button>
             </div>
 
             <div className="table-container">
-                <span className="last-updated">Всего криптовалют: {filteredCrypto.length}</span>
+                <span className="last-updated">{t('totalCryptocurrencies')}: {filteredCrypto.length}</span>
                 <table className="crypto-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Имя</th>
-                            <th>Пара</th>
+                            <th>{t('exchangeId')}</th>
+                            <th>{t('name')}</th>
+                            <th>{t('pair')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredCrypto.length === 0 ? (
                             <tr>
                                 <td colSpan={3} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
-                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                    {searchTerm ? t('nothingFound') : t('noData')}
                                 </td>
                             </tr>
                         ) : (
@@ -173,6 +406,7 @@ const CryptoDashboard = () => {
 };
 
 const NewsDashboard = () => {
+    const { t } = useApp();
     const [news, setNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
@@ -230,7 +464,7 @@ const NewsDashboard = () => {
     if (loading) {
         return (
             <main className="main-content">
-                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка новостей...</div>
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>{t('loadingNews')}</div>
             </main>
         );
     }
@@ -246,7 +480,7 @@ const NewsDashboard = () => {
     return (
         <main className="main-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Новости</h1>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>{t('news')}</h1>
                 <button 
                     className="filter-button" 
                     onClick={() => setShowCreateForm(!showCreateForm)}
@@ -256,7 +490,7 @@ const NewsDashboard = () => {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Создать новость
+                    {t('createNews')}
                 </button>
             </div>
 
@@ -276,7 +510,7 @@ const NewsDashboard = () => {
                         )}
                         <input
                             type="text"
-                            placeholder="Заголовок новости..."
+                            placeholder={t('newsTitle')}
                             value={createTitle}
                             onChange={(e) => setCreateTitle(e.target.value)}
                             style={{
@@ -294,7 +528,7 @@ const NewsDashboard = () => {
                             required
                         />
                         <textarea
-                            placeholder="Содержание новости..."
+                            placeholder={t('newsContent')}
                             value={createContent}
                             onChange={(e) => setCreateContent(e.target.value)}
                             rows={6}
@@ -326,7 +560,7 @@ const NewsDashboard = () => {
                                 }}
                                 disabled={createLoading}
                             >
-                                Отмена
+                                {t('cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -339,7 +573,7 @@ const NewsDashboard = () => {
                                 }}
                                 disabled={createLoading}
                             >
-                                {createLoading ? 'Создание...' : 'Создать'}
+                                {createLoading ? t('creating') : t('createNews')}
                             </button>
                         </div>
                     </form>
@@ -384,6 +618,7 @@ const NewsDashboard = () => {
 };
 
 const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
+    const { t } = useApp();
     const [profileData, setProfileData] = useState<User | null>(user);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -431,7 +666,7 @@ const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
         }
     };
 
-    const userName = profileData?.login || 'Пользователь';
+    const userName = profileData?.login || t('user');
     const avatarSrc = profileData?.profile_image 
         ? `data:image/jpeg;base64,${profileData.profile_image}`
         : 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop';
@@ -471,7 +706,7 @@ const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
                                 cursor: uploading ? 'not-allowed' : 'pointer',
                                 opacity: uploading ? 0.6 : 1,
                             }}
-                            title="Изменить аватар"
+                            title={t('changeAvatar')}
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -486,15 +721,9 @@ const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
                             onChange={handleImageUpload}
                             style={{ display: 'none' }}
                         />
-                    </div>
-                    <h1 className="profile-greeting">Добрый день, {loading ? 'Загрузка...' : userName}</h1>
-                    {profileData && (
-                        <div style={{ color: 'white', marginBottom: '10px', fontSize: '14px' }}>
-                            <div>Email: {profileData.email}</div>
-                            <div>Роль: {profileData.role}</div>
                         </div>
-                    )}
-                    <button className="logout-button" onClick={onLogout}>Выйти</button>
+                    <h1 className="profile-greeting">{t('goodDay')}, {loading ? t('loading') : userName}</h1>
+                    <button className="logout-button" onClick={onLogout}>{t('logout')}</button>
                 </div>
         </main>
         <footer className="profile-footer">
@@ -508,6 +737,7 @@ const ProfilePage = ({ onBackClick, onLogout, user, onProfileUpdate }) => {
 
 
 const ExchangesDashboard = () => {
+    const { t } = useApp();
     const [exchanges, setExchanges] = useState<Exchange[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
@@ -537,7 +767,7 @@ const ExchangesDashboard = () => {
     if (loading) {
         return (
             <main className="main-content">
-                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка бирж...</div>
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>{t('loadingExchanges')}</div>
             </main>
         );
     }
@@ -559,32 +789,32 @@ const ExchangesDashboard = () => {
                     </span>
                     <input
                         type="text"
-                        placeholder="Найти биржу..."
+                        placeholder={t('findExchange')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="filter-button">Сортировать</button>
-                <button className="filter-button">Рейтинг</button>
+                <button className="filter-button">{t('sort')}</button>
+                <button className="filter-button">{t('rating')}</button>
             </div>
 
             <div className="table-container">
-                <span className="last-updated">Всего бирж: {filteredExchanges.length}</span>
+                <span className="last-updated">{t('totalExchanges')}: {filteredExchanges.length}</span>
                 <table className="crypto-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Название</th>
-                            <th>Торговый объем</th>
-                            <th>Монет на бирже</th>
-                            <th>Рейтинг</th>
+                            <th>{t('exchangeId')}</th>
+                            <th>{t('name')}</th>
+                            <th>{t('tradingVolume')}</th>
+                            <th>{t('coinsListed')}</th>
+                            <th>{t('rating')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredExchanges.length === 0 ? (
                             <tr>
                                 <td colSpan={5} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
-                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                    {searchTerm ? t('nothingFound') : t('noData')}
                                 </td>
                             </tr>
                         ) : (
@@ -614,6 +844,7 @@ const ExchangesDashboard = () => {
 };
 
 const PortfoliosDashboard = () => {
+    const { t } = useApp();
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
@@ -676,7 +907,7 @@ const PortfoliosDashboard = () => {
     if (loading) {
         return (
             <main className="main-content">
-                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>Загрузка портфелей...</div>
+                <div style={{ color: 'white', textAlign: 'center', padding: '40px' }}>{t('loadingPortfolios')}</div>
             </main>
         );
     }
@@ -692,7 +923,7 @@ const PortfoliosDashboard = () => {
     return (
         <main className="main-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Портфели</h1>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>{t('portfolios')}</h1>
                 <button 
                     className="filter-button" 
                     onClick={() => setShowCreateForm(!showCreateForm)}
@@ -702,7 +933,7 @@ const PortfoliosDashboard = () => {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Создать портфель
+                    {t('createPortfolio')}
                 </button>
             </div>
 
@@ -722,7 +953,7 @@ const PortfoliosDashboard = () => {
                         )}
                         <input
                             type="text"
-                            placeholder="Риск (например: low, medium, high)..."
+                            placeholder={t('portfolioRiskPlaceholder')}
                             value={createRisk}
                             onChange={(e) => setCreateRisk(e.target.value)}
                             style={{
@@ -741,7 +972,7 @@ const PortfoliosDashboard = () => {
                         />
                         <input
                             type="number"
-                            placeholder="Годовая доходность (%)..."
+                            placeholder={t('annualReturnPlaceholder')}
                             value={createAnnualReturn}
                             onChange={(e) => setCreateAnnualReturn(e.target.value)}
                             step="0.01"
@@ -770,7 +1001,7 @@ const PortfoliosDashboard = () => {
                                 }}
                                 disabled={createLoading}
                             >
-                                Отмена
+                                {t('cancel')}
                             </button>
                             <button
                                 type="submit"
@@ -783,7 +1014,7 @@ const PortfoliosDashboard = () => {
                                 }}
                                 disabled={createLoading}
                             >
-                                {createLoading ? 'Создание...' : 'Создать'}
+                                {createLoading ? t('creating') : t('createPortfolio')}
                             </button>
                         </div>
                     </form>
@@ -797,32 +1028,32 @@ const PortfoliosDashboard = () => {
                     </span>
                     <input
                         type="text"
-                        placeholder="Найти портфель..."
+                        placeholder={t('findPortfolio')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="filter-button">Сортировать</button>
-                <button className="filter-button">Риск</button>
+                <button className="filter-button">{t('sort')}</button>
+                <button className="filter-button">{t('risk')}</button>
             </div>
 
             <div className="table-container">
-                <span className="last-updated">Всего портфелей: {filteredPortfolios.length}</span>
+                <span className="last-updated">{t('totalPortfolios')}: {filteredPortfolios.length}</span>
                 <table className="crypto-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Риск</th>
-                            <th>Годовая доходность</th>
-                            <th>Статус</th>
-                            <th>Дата создания</th>
+                            <th>{t('exchangeId')}</th>
+                            <th>{t('risk')}</th>
+                            <th>{t('annualReturn')}</th>
+                            <th>{t('status')}</th>
+                            <th>{t('createdAt')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredPortfolios.length === 0 ? (
                             <tr>
                                 <td colSpan={5} style={{ textAlign: 'center', color: 'white', padding: '20px' }}>
-                                    {searchTerm ? 'Ничего не найдено' : 'Нет данных'}
+                                    {searchTerm ? t('nothingFound') : t('noData')}
                                 </td>
                             </tr>
                         ) : (
@@ -835,7 +1066,7 @@ const PortfoliosDashboard = () => {
                                         </div>
                                     </td>
                                     <td>{portfolio.annual_return}%</td>
-                                    <td>{portfolio.is_active ? 'Активен' : 'Неактивен'}</td>
+                                    <td>{portfolio.is_active ? t('active') : t('inactive')}</td>
                                     <td>{new Date(portfolio.created_at).toLocaleDateString('ru-RU')}</td>
                                 </tr>
                             ))
@@ -883,9 +1114,19 @@ const FinanceApp = ({ onLogout, user, setUser }) => {
         return <ProfilePage onBackClick={() => setView('dashboard')} onLogout={onLogout} user={user} onProfileUpdate={handleProfileUpdate} />;
     }
 
+    if (view === 'settings') {
+        return <SettingsPage onBackClick={() => setView('dashboard')} user={user} onProfileUpdate={handleProfileUpdate} />;
+    }
+
     return (
         <div className="app-container">
-            <Header activePage={activePage} setActivePage={setActivePage} onProfileClick={() => setView('profile')} user={user} />
+            <Header 
+                activePage={activePage} 
+                setActivePage={setActivePage} 
+                onProfileClick={() => setView('profile')} 
+                onSettingsClick={() => setView('settings')}
+                user={user} 
+            />
             {renderPage()}
         </div>
     );
@@ -1013,6 +1254,29 @@ const App = () => {
     const [loginLoading, setLoginLoading] = useState(false);
     const [registerLoading, setRegisterLoading] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
+    const [theme, setTheme] = useState<Theme>(() => {
+        const saved = localStorage.getItem('theme');
+        return (saved as Theme) || 'dark';
+    });
+    const [language, setLanguage] = useState<Language>(() => {
+        const saved = localStorage.getItem('language');
+        return (saved as Language) || 'ru';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('theme', theme);
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
+
+    useEffect(() => {
+        localStorage.setItem('language', language);
+    }, [language]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, []);
+
+    const t = (key: string) => getTranslation(key, language);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -1088,8 +1352,17 @@ const App = () => {
         );
     }
 
+    const contextValue: AppContextType = {
+        theme,
+        setTheme,
+        language,
+        setLanguage,
+        t,
+    };
+
     if (!isAuthenticated) {
         return (
+            <AppContext.Provider value={contextValue}>
             <AuthPage
                 onLogin={handleLogin}
                 onRegister={handleRegister}
@@ -1098,10 +1371,15 @@ const App = () => {
                 loginLoading={loginLoading}
                 registerLoading={registerLoading}
             />
+            </AppContext.Provider>
         );
     }
 
-    return <FinanceApp onLogout={handleLogout} user={user} setUser={setUser} />;
+    return (
+        <AppContext.Provider value={contextValue}>
+            <FinanceApp onLogout={handleLogout} user={user} setUser={setUser} />
+        </AppContext.Provider>
+    );
 };
 
 const rootElement = document.getElementById('root');

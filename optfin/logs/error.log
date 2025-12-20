@@ -283,3 +283,15 @@ LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
 2025-12-20 16:42:38,141 ERROR exchanges.views Error message
 2025-12-20 16:42:38,176 ERROR portfolios.views Error message
 2025-12-20 16:42:38,206 ERROR telegramChat.views Error message
+2025-12-20 16:54:17,803 ERROR registration.views Error message
+2025-12-20 16:54:17,825 ERROR news.views Error message
+2025-12-20 16:54:17,839 ERROR cryptocurrencies.views Error message
+2025-12-20 16:54:17,849 ERROR exchanges.views Error message
+2025-12-20 16:54:17,860 ERROR portfolios.views Error message
+2025-12-20 16:54:17,872 ERROR telegramChat.views Error message
+2025-12-20 16:55:29,362 ERROR registration.views Error message
+2025-12-20 16:55:29,419 ERROR news.views Error message
+2025-12-20 16:55:29,483 ERROR cryptocurrencies.views Error message
+2025-12-20 16:55:29,515 ERROR exchanges.views Error message
+2025-12-20 16:55:29,543 ERROR portfolios.views Error message
+2025-12-20 16:55:29,563 ERROR telegramChat.views Error message
