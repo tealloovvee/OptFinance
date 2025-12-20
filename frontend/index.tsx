@@ -4,15 +4,6 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange } from './api';
 
-const calculationHistory = [
-    { id: 1, description: 'Пополнение баланса', date: '2024-07-25', amount: '+50.00 USD', type: 'deposit' },
-    { id: 2, description: 'Покупка BTC', date: '2024-07-24', amount: '-25.00 USD', type: 'withdrawal' },
-    { id: 3, description: 'Продажа ETH', date: '2024-07-23', amount: '+15.00 USD', type: 'deposit' },
-    { id: 4, description: 'Вывод средств', date: '2024-07-22', amount: '-10.00 USD', type: 'withdrawal' },
-    { id: 5, description: 'Пополнение баланса', date: '2024-07-21', amount: '+100.00 USD', type: 'deposit' },
-    { id: 6, description: 'Покупка SOL', date: '2024-07-20', amount: '-75.00 USD', type: 'withdrawal' },
-];
-
 const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
     <header className="app-header">
         <div className="header-left">
@@ -22,7 +13,7 @@ const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
                         <path d="M4 16V20M10 12V20M16 4V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </div>
-                <span>Oetfinance</span>
+                <span>OptFinance</span>
             </div>
             <nav>
                 <a href="#" className={activePage === 'exchanges' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setActivePage('exchanges'); }}>Биржи</a>
@@ -31,10 +22,6 @@ const Header = ({ activePage, setActivePage, onProfileClick, user }) => (
             </nav>
         </div>
         <div className="header-right">
-            <div className="balance">
-                <div className="balance-label">Баланс:</div>
-                <div className="balance-amount">25USD</div>
-            </div>
             <img
                 src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop"
                 alt="User Avatar"
@@ -182,6 +169,11 @@ const NewsDashboard = () => {
     const [news, setNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
+    const [showCreateForm, setShowCreateForm] = useState(false);
+    const [createTitle, setCreateTitle] = useState('');
+    const [createContent, setCreateContent] = useState('');
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createError, setCreateError] = useState<string>('');
 
     useEffect(() => {
         const loadNews = async () => {
@@ -199,6 +191,34 @@ const NewsDashboard = () => {
         };
         loadNews();
     }, []);
+
+    const handleCreateNews = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!createTitle.trim() || !createContent.trim()) {
+            setCreateError('Заполните все поля');
+            return;
+        }
+
+        setCreateLoading(true);
+        setCreateError('');
+
+        try {
+            await api.createNews({
+                title: createTitle,
+                content: createContent,
+            });
+            setCreateTitle('');
+            setCreateContent('');
+            setShowCreateForm(false);
+            // Перезагружаем новости
+            const response = await api.getNews();
+            setNews(response.news || []);
+        } catch (err: any) {
+            setCreateError(err.message || 'Ошибка создания новости');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -218,6 +238,107 @@ const NewsDashboard = () => {
 
     return (
         <main className="main-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Новости</h1>
+                <button 
+                    className="filter-button" 
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Создать новость
+                </button>
+            </div>
+
+            {showCreateForm && (
+                <div style={{ 
+                    background: 'var(--background-light)', 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '1rem', 
+                    padding: '1.5rem', 
+                    marginBottom: '1.5rem' 
+                }}>
+                    <form onSubmit={handleCreateNews}>
+                        {createError && (
+                            <div style={{ color: 'red', marginBottom: '1rem', fontSize: '14px' }}>
+                                {createError}
+                            </div>
+                        )}
+                        <input
+                            type="text"
+                            placeholder="Заголовок новости..."
+                            value={createTitle}
+                            onChange={(e) => setCreateTitle(e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'var(--background-dark)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '0.5rem',
+                                padding: '0.75rem 1rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '1rem',
+                                marginBottom: '1rem',
+                                boxSizing: 'border-box'
+                            }}
+                            disabled={createLoading}
+                            required
+                        />
+                        <textarea
+                            placeholder="Содержание новости..."
+                            value={createContent}
+                            onChange={(e) => setCreateContent(e.target.value)}
+                            rows={6}
+                            style={{
+                                width: '100%',
+                                background: 'var(--background-dark)',
+                                border: '1px solid var(--border-color)',
+                                borderRadius: '0.5rem',
+                                padding: '0.75rem 1rem',
+                                color: 'var(--text-primary)',
+                                fontSize: '1rem',
+                                marginBottom: '1rem',
+                                boxSizing: 'border-box',
+                                resize: 'vertical',
+                                fontFamily: 'inherit'
+                            }}
+                            disabled={createLoading}
+                            required
+                        />
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                className="filter-button"
+                                onClick={() => {
+                                    setShowCreateForm(false);
+                                    setCreateTitle('');
+                                    setCreateContent('');
+                                    setCreateError('');
+                                }}
+                                disabled={createLoading}
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                type="submit"
+                                className="filter-button"
+                                style={{ 
+                                    background: 'var(--accent-orange)', 
+                                    borderColor: 'var(--accent-orange)',
+                                    color: 'var(--background-dark)',
+                                    fontWeight: 600
+                                }}
+                                disabled={createLoading}
+                            >
+                                {createLoading ? 'Создание...' : 'Создать'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
             <div className="news-grid">
                 {news.length === 0 ? (
                     <div style={{ color: 'white', textAlign: 'center', padding: '40px', gridColumn: '1 / -1' }}>
@@ -286,7 +407,6 @@ const ProfilePage = ({ onBackClick, onLogout, user }) => {
                         <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                 </button>
-                <div className="balance-info">25USD</div>
             </header>
             <main className="profile-main">
                 <div className="profile-content">
@@ -304,29 +424,6 @@ const ProfilePage = ({ onBackClick, onLogout, user }) => {
                     </div>
                     <button className="logout-button" onClick={onLogout}>Выйти</button>
                 </div>
-
-            <div className="calculation-history">
-                <div className="history-header">
-                    <svg className="scroll-up-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 19V5M12 5L19 12M12 5L5 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <h2 className="history-title">История расчетов</h2>
-                </div>
-                <div className="history-divider"></div>
-                <ul className="history-list">
-                    {calculationHistory.map(item => (
-                        <li key={item.id} className="history-item">
-                            <div className="item-details">
-                                <span className="item-description">{item.description}</span>
-                                <span className="item-date">{item.date}</span>
-                            </div>
-                            <span className={`item-amount ${item.type === 'deposit' ? 'positive' : 'negative'}`}>
-                                {item.amount}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
         </main>
         <footer className="profile-footer">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
