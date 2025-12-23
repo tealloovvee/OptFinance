@@ -306,6 +306,7 @@ const CryptoDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
     useEffect(() => {
         const loadCryptocurrencies = async () => {
@@ -329,7 +330,10 @@ const CryptoDashboard = () => {
             coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             coin.pair.toLowerCase().includes(searchTerm.toLowerCase())
         )
-        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        .sort((a, b) => {
+            const dir = sortOrder === 'asc' ? 1 : -1;
+            return dir * a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        });
 
     if (loading) {
         return (
@@ -362,7 +366,12 @@ const CryptoDashboard = () => {
                     />
                 </div>
                 <button className="filter-button">{t('category')}</button>
-                <button className="filter-button">{t('sort')}</button>
+                <button
+                    className="filter-button"
+                    onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                >
+                    {t('sort')} ({sortOrder === 'asc' ? 'A→Z' : 'Z→A'})
+                </button>
                 <button className="filter-button">{t('popularity')}</button>
             </div>
 
@@ -407,7 +416,7 @@ const CryptoDashboard = () => {
     );
 };
 
-const NewsDashboard = () => {
+const NewsDashboard = ({ user }: { user: User | null }) => {
     const { t } = useApp();
     const [news, setNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -415,8 +424,16 @@ const NewsDashboard = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [createTitle, setCreateTitle] = useState('');
     const [createContent, setCreateContent] = useState('');
+    const [createPhoto, setCreatePhoto] = useState<File | null>(null);
     const [createLoading, setCreateLoading] = useState(false);
     const [createError, setCreateError] = useState<string>('');
+    const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState('');
+    const [editContent, setEditContent] = useState('');
+    const [editPhoto, setEditPhoto] = useState<File | null>(null);
+    const [editLoading, setEditLoading] = useState(false);
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         const loadNews = async () => {
@@ -441,6 +458,10 @@ const NewsDashboard = () => {
             setCreateError('Заполните все поля');
             return;
         }
+        if (!createPhoto) {
+            setCreateError('Добавьте обложку для новости');
+            return;
+        }
 
         setCreateLoading(true);
         setCreateError('');
@@ -449,9 +470,11 @@ const NewsDashboard = () => {
             await api.createNews({
                 title: createTitle,
                 content: createContent,
+                photo_file: createPhoto,
             });
             setCreateTitle('');
             setCreateContent('');
+            setCreatePhoto(null);
             setShowCreateForm(false);
             // Перезагружаем новости
             const response = await api.getNews();
@@ -460,6 +483,43 @@ const NewsDashboard = () => {
             setCreateError(err.message || 'Ошибка создания новости');
         } finally {
             setCreateLoading(false);
+        }
+    };
+
+    const handleCardClick = (article: NewsItem) => {
+        setSelectedNews(article);
+        setIsEditing(false);
+        setEditTitle(article.title);
+        setEditContent(article.content);
+        setEditPhoto(null);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedNews(null);
+        setIsEditing(false);
+        setEditPhoto(null);
+    };
+
+    const handleEditSave = async () => {
+        if (!selectedNews) return;
+        if (!editTitle.trim() || !editContent.trim()) return;
+        setEditLoading(true);
+        try {
+            const updated = await api.updateNews(selectedNews.id, {
+                title: editTitle,
+                content: editContent,
+                photo_file: editPhoto || undefined,
+            });
+            // refresh list and selected
+            const response = await api.getNews();
+            setNews(response.news || []);
+            setSelectedNews(updated.news);
+            setIsEditing(false);
+            setEditPhoto(null);
+        } catch (err) {
+            console.error('Ошибка обновления новости:', err);
+        } finally {
+            setEditLoading(false);
         }
     };
 
@@ -550,6 +610,14 @@ const NewsDashboard = () => {
                             disabled={createLoading}
                             required
                         />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setCreatePhoto(e.target.files?.[0] || null)}
+                            style={{ marginBottom: '1rem' }}
+                            disabled={createLoading}
+                            required
+                        />
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                             <button
                                 type="button"
@@ -558,6 +626,7 @@ const NewsDashboard = () => {
                                     setShowCreateForm(false);
                                     setCreateTitle('');
                                     setCreateContent('');
+                                    setCreatePhoto(null);
                                     setCreateError('');
                                 }}
                                 disabled={createLoading}
@@ -589,32 +658,84 @@ const NewsDashboard = () => {
                     </div>
                 ) : (
                     news.map((article) => (
-                        <div className="news-card" key={article.id}>
+                        <div className="news-card" key={article.id} onClick={() => handleCardClick(article)} style={{ cursor: 'pointer' }}>
                             {article.photo && (
                                 <img
                                     src={`data:image/jpeg;base64,${article.photo}`}
                                     alt={article.title}
-                                    style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', marginBottom: '10px', borderRadius: '8px' }}
+                                    className="news-cover"
                                 />
                             )}
                             <h2>{article.title}</h2>
-                            <p className="news-excerpt">
-                                {article.content.length > 200
-                                    ? `${article.content.substring(0, 200)}...`
-                                    : article.content}
-                            </p>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
-                                <span className="news-source">{article.user_login}</span>
-                                {article.published_at && (
-                                    <span style={{ color: '#888', fontSize: '12px' }}>
-                                        {new Date(article.published_at).toLocaleDateString('ru-RU')}
-                                    </span>
-                                )}
-                            </div>
                         </div>
                     ))
                 )}
             </div>
+
+            {selectedNews && (
+                <div className="modal-overlay" onClick={handleCloseModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>{isEditing ? 'Редактировать новость' : selectedNews.title}</h2>
+                            <button className="modal-close" onClick={handleCloseModal}>×</button>
+                        </div>
+                        {selectedNews.photo && (
+                            <img
+                                src={`data:image/jpeg;base64,${selectedNews.photo}`}
+                                alt={selectedNews.title}
+                                className="modal-cover"
+                            />
+                        )}
+                        {isEditing ? (
+                            <div className="modal-body">
+                                <input
+                                    type="text"
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    className="modal-input"
+                                    placeholder="Заголовок"
+                                />
+                                <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="modal-textarea"
+                                    rows={8}
+                                    placeholder="Текст новости"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setEditPhoto(e.target.files?.[0] || null)}
+                                />
+                                <div className="modal-actions">
+                                    <button className="filter-button" onClick={() => { setIsEditing(false); setEditPhoto(null); }}>
+                                        Отмена
+                                    </button>
+                                    <button
+                                        className="filter-button"
+                                        style={{ background: 'var(--accent-orange)', borderColor: 'var(--accent-orange)', color: 'var(--background-dark)', fontWeight: 600 }}
+                                        onClick={handleEditSave}
+                                        disabled={editLoading}
+                                    >
+                                        {editLoading ? 'Сохранение...' : 'Сохранить'}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="modal-body">
+                                <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{selectedNews.content}</p>
+                                {(isAdmin || selectedNews.user_id === user?.id) && (
+                                    <div className="modal-actions">
+                                        <button className="filter-button" onClick={() => setIsEditing(true)}>
+                                            Редактировать
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </main>
     );
 };
@@ -744,6 +865,7 @@ const ExchangesDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
     useEffect(() => {
         const loadExchanges = async () => {
@@ -762,9 +884,14 @@ const ExchangesDashboard = () => {
         loadExchanges();
     }, []);
 
-    const filteredExchanges = exchanges.filter(exchange =>
-        exchange.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredExchanges = exchanges
+        .filter(exchange =>
+            exchange.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => {
+            const dir = sortOrder === 'asc' ? 1 : -1;
+            return dir * (a.id - b.id);
+        });
 
     if (loading) {
         return (
@@ -796,7 +923,12 @@ const ExchangesDashboard = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="filter-button">{t('sort')}</button>
+                <button
+                    className="filter-button"
+                    onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                >
+                    {t('sort')} ({sortOrder === 'asc' ? 'ID ↑' : 'ID ↓'})
+                </button>
                 <button className="filter-button">{t('rating')}</button>
             </div>
 
@@ -1299,7 +1431,7 @@ const FinanceApp = ({ onLogout, user, setUser }) => {
     const renderPage = () => {
         switch (activePage) {
             case 'news':
-                return <NewsDashboard />;
+                return <NewsDashboard user={user} />;
             case 'exchanges':
                 return <ExchangesDashboard />;
             case 'portfolios':
