@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models.functions import Lower
 from .models import CryptoCoin
 import logging
 
@@ -27,7 +28,8 @@ def get_all_cryptocurrencies(request):
     Получить все криптовалюты
     """
     try:
-        coins = CryptoCoin.objects.all().order_by('name')
+        # Сортируем по имени без учета регистра (case-insensitive)
+        coins = CryptoCoin.objects.all().order_by(Lower('name'))
         coins_data = [serialize_crypto_coin(coin) for coin in coins]
 
         logger.info(f"Retrieved {len(coins_data)} cryptocurrencies")
