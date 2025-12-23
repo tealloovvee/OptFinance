@@ -1082,6 +1082,103 @@ const PortfoliosDashboard = () => {
     );
 };
 
+interface ChatMessage {
+    id: number;
+    from: 'admin' | 'user';
+    text: string;
+    createdAt: Date;
+}
+
+const ChatWidget = ({ user }: { user: User | null }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [messages, setMessages] = useState<ChatMessage[]>([
+        {
+            id: 1,
+            from: 'admin',
+            text: 'Здравствуйте! Чем могу помочь?',
+            createdAt: new Date(),
+        },
+    ]);
+    const [draft, setDraft] = useState('');
+
+    const toggleChat = () => setIsOpen((prev) => !prev);
+
+    const handleSend = () => {
+        const text = draft.trim();
+        if (!text) return;
+
+        setMessages((prev) => [
+            ...prev,
+            {
+                id: prev.length + 1,
+                from: 'user',
+                text,
+                createdAt: new Date(),
+            },
+        ]);
+        setDraft('');
+        // Here we could call API/WebSocket to send message to admin
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    return (
+        <>
+            <button
+                className="chat-toggle-button"
+                aria-label="Открыть чат"
+                onClick={toggleChat}
+            >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15c0 1.1-.9 2-2 2H7l-4 4V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v10Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 8h10M7 12h6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            </button>
+
+            <div className={`chat-panel ${isOpen ? 'open' : ''}`}>
+                <div className="chat-header">
+                    <div>
+                        <div className="chat-admin-name">Админ</div>
+                        <div className="chat-admin-status">Онлайн</div>
+                    </div>
+                    <button className="chat-close" aria-label="Закрыть чат" onClick={toggleChat}>
+                        ×
+                    </button>
+                </div>
+
+                <div className="chat-messages">
+                    {messages.map((msg) => (
+                        <div key={msg.id} className={`chat-message ${msg.from === 'admin' ? 'from-admin' : 'from-user'}`}>
+                            <div className="chat-message-author">
+                                {msg.from === 'admin' ? 'Админ' : user?.login || 'Вы'}
+                            </div>
+                            <div className="chat-message-text">{msg.text}</div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="chat-input-row">
+                    <input
+                        type="text"
+                        placeholder="Введите сообщение..."
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                    />
+                    <button onClick={handleSend} className="chat-send" aria-label="Отправить">
+                        Отправить
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+};
+
 const FinanceApp = ({ onLogout, user, setUser }) => {
     const [activePage, setActivePage] = useState('crypto');
     const [view, setView] = useState('dashboard');
@@ -1128,6 +1225,7 @@ const FinanceApp = ({ onLogout, user, setUser }) => {
                 user={user} 
             />
             {renderPage()}
+            <ChatWidget user={user} />
         </div>
     );
 };
