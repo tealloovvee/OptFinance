@@ -524,11 +524,24 @@ nav a.active {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-orange);
 }
 
 .news-card h2 {
     font-size: 1.25rem;
     margin: 0;
+}
+
+.news-cover {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 0.75rem;
 }
 
 .news-excerpt {
@@ -546,6 +559,80 @@ nav a.active {
     background-color: var(--border-color);
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1100;
+}
+
+.modal {
+    background: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-cover {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+}
+
+.modal-body {
+    padding: 1rem 1.25rem 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modal-input, .modal-textarea {
+    background: var(--background-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.modal-textarea {
+    resize: vertical;
+    min-height: 160px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
 }
 
 /* Profile Page */
