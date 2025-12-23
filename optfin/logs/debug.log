@@ -830,3 +830,220 @@ client_session: <aiohttp.client.ClientSession object at 0x7909531d9160>
 2025-12-23 11:15:53,612 ERROR asyncio Unclosed connector
 connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x79095318ee70>, 673.520100896)])']
 connector: <aiohttp.connector.TCPConnector object at 0x7909531d8980>
+2025-12-23 12:06:28,912 DEBUG registration.views Debug message
+2025-12-23 12:06:28,912 INFO registration.views Info message
+2025-12-23 12:06:28,913 ERROR registration.views Error message
+2025-12-23 12:06:28,965 DEBUG news.views Debug message
+2025-12-23 12:06:28,965 INFO news.views Info message
+2025-12-23 12:06:28,965 ERROR news.views Error message
+2025-12-23 12:06:28,996 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:06:28,996 INFO cryptocurrencies.views Info message
+2025-12-23 12:06:28,997 ERROR cryptocurrencies.views Error message
+2025-12-23 12:06:29,009 DEBUG exchanges.views Debug message
+2025-12-23 12:06:29,009 INFO exchanges.views Info message
+2025-12-23 12:06:29,009 ERROR exchanges.views Error message
+2025-12-23 12:06:29,032 DEBUG portfolios.views Debug message
+2025-12-23 12:06:29,032 INFO portfolios.views Info message
+2025-12-23 12:06:29,032 ERROR portfolios.views Error message
+2025-12-23 12:06:29,056 DEBUG telegramChat.views Debug message
+2025-12-23 12:06:29,057 INFO telegramChat.views Info message
+2025-12-23 12:06:29,057 ERROR telegramChat.views Error message
+2025-12-23 12:06:37,134 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:37,379 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1 HTTP/1.1" 200 None
+2025-12-23 12:06:37,443 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:37,638 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:06:37,639 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:37,855 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:06:43,865 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:44,165 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/ethereum/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:06:44,166 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:44,379 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:06:50,390 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:50,494 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/tether/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:06:56,500 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:06:56,600 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/binancecoin/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:02,606 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:02,725 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/ripple/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:08,729 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:08,861 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/usd-coin/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:14,863 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:15,027 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/solana/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:21,031 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:21,194 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/tron/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:27,198 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:27,295 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/staked-ether/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:33,302 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:33,813 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/dogecoin/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:39,814 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:39,894 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/figure-heloc/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:45,900 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:45,987 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/cardano/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:07:51,992 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:52,353 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/whitebit/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:07:52,357 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:52,656 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/whitebit/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:07:58,666 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:58,934 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/bitcoin-cash/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:07:58,936 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:07:59,189 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/bitcoin-cash/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:08:05,199 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:05,510 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/wrapped-steth/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:08:05,512 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:05,777 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/wrapped-steth/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:08:11,781 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:11,942 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/wrapped-bitcoin/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:17,946 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:18,032 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/wrapped-beacon-eth/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:24,036 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:24,147 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/usds/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:30,151 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:30,257 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/wrapped-eeth/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:36,262 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:36,380 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/binance-bridged-usdt-bnb-smart-chain/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:42,383 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:42,495 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/chainlink/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:48,501 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:48,638 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/monero/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:08:54,644 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:08:54,721 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/leo-token/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:09:00,725 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:09:00,884 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/weth/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:09:06,888 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:09:07,019 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/stellar/ohlc?vs_currency=usd&days=1 HTTP/1.1" 429 187
+2025-12-23 12:09:13,020 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:09:13,470 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/zcash/ohlc?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:09:13,473 DEBUG urllib3.connectionpool Starting new HTTPS connection (1): api.coingecko.com:443
+2025-12-23 12:09:13,961 DEBUG urllib3.connectionpool https://api.coingecko.com:443 "GET /api/v3/coins/zcash/market_chart?vs_currency=usd&days=1 HTTP/1.1" 200 None
+2025-12-23 12:10:01,922 DEBUG registration.views Debug message
+2025-12-23 12:10:01,922 INFO registration.views Info message
+2025-12-23 12:10:01,922 ERROR registration.views Error message
+2025-12-23 12:10:01,937 DEBUG news.views Debug message
+2025-12-23 12:10:01,937 INFO news.views Info message
+2025-12-23 12:10:01,938 ERROR news.views Error message
+2025-12-23 12:10:01,951 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:10:01,952 INFO cryptocurrencies.views Info message
+2025-12-23 12:10:01,952 ERROR cryptocurrencies.views Error message
+2025-12-23 12:10:01,968 DEBUG exchanges.views Debug message
+2025-12-23 12:10:01,968 INFO exchanges.views Info message
+2025-12-23 12:10:01,969 ERROR exchanges.views Error message
+2025-12-23 12:10:01,994 DEBUG portfolios.views Debug message
+2025-12-23 12:10:01,994 INFO portfolios.views Info message
+2025-12-23 12:10:01,995 ERROR portfolios.views Error message
+2025-12-23 12:10:02,020 DEBUG telegramChat.views Debug message
+2025-12-23 12:10:02,021 INFO telegramChat.views Info message
+2025-12-23 12:10:02,022 ERROR telegramChat.views Error message
+2025-12-23 12:10:02,029 WARNING django.request Unauthorized: /registration/auth/profile/
+2025-12-23 12:10:02,087 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:02,094 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:10:05,098 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:08,106 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:11,130 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:11,168 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:10:12,109 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:10:12,598 INFO news.views Retrieved 0 news items
+2025-12-23 12:10:13,041 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:10:14,155 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:17,181 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:20,209 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:23,234 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:26,269 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:29,326 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:32,365 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:35,504 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:38,687 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:41,917 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:45,367 INFO news.views Retrieved 0 news items
+2025-12-23 12:10:45,693 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:46,377 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:10:50,940 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:10:51,813 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:10:55,394 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:11:00,815 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:11:06,148 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:11:10,473 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:11:18,059 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:11:26,729 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:16:50,038 DEBUG registration.views Debug message
+2025-12-23 12:16:50,039 INFO registration.views Info message
+2025-12-23 12:16:50,039 ERROR registration.views Error message
+2025-12-23 12:16:50,057 DEBUG news.views Debug message
+2025-12-23 12:16:50,057 INFO news.views Info message
+2025-12-23 12:16:50,058 ERROR news.views Error message
+2025-12-23 12:16:50,075 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:16:50,075 INFO cryptocurrencies.views Info message
+2025-12-23 12:16:50,076 ERROR cryptocurrencies.views Error message
+2025-12-23 12:16:50,095 DEBUG exchanges.views Debug message
+2025-12-23 12:16:50,096 INFO exchanges.views Info message
+2025-12-23 12:16:50,097 ERROR exchanges.views Error message
+2025-12-23 12:16:50,114 DEBUG portfolios.views Debug message
+2025-12-23 12:16:50,115 INFO portfolios.views Info message
+2025-12-23 12:16:50,116 ERROR portfolios.views Error message
+2025-12-23 12:16:50,130 DEBUG telegramChat.views Debug message
+2025-12-23 12:16:50,131 INFO telegramChat.views Info message
+2025-12-23 12:16:50,131 ERROR telegramChat.views Error message
+2025-12-23 12:17:26,407 DEBUG registration.views Debug message
+2025-12-23 12:17:26,407 INFO registration.views Info message
+2025-12-23 12:17:26,408 ERROR registration.views Error message
+2025-12-23 12:17:26,420 DEBUG news.views Debug message
+2025-12-23 12:17:26,420 INFO news.views Info message
+2025-12-23 12:17:26,421 ERROR news.views Error message
+2025-12-23 12:17:26,431 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:17:26,431 INFO cryptocurrencies.views Info message
+2025-12-23 12:17:26,431 ERROR cryptocurrencies.views Error message
+2025-12-23 12:17:26,442 DEBUG exchanges.views Debug message
+2025-12-23 12:17:26,442 INFO exchanges.views Info message
+2025-12-23 12:17:26,442 ERROR exchanges.views Error message
+2025-12-23 12:17:26,453 DEBUG portfolios.views Debug message
+2025-12-23 12:17:26,453 INFO portfolios.views Info message
+2025-12-23 12:17:26,454 ERROR portfolios.views Error message
+2025-12-23 12:17:26,466 DEBUG telegramChat.views Debug message
+2025-12-23 12:17:26,466 INFO telegramChat.views Info message
+2025-12-23 12:17:26,467 ERROR telegramChat.views Error message
+2025-12-23 12:17:26,509 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:26,520 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:17:29,534 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:32,554 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:35,585 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:38,596 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:41,628 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:44,672 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:47,220 DEBUG asyncio Using selector: EpollSelector
+2025-12-23 12:17:47,494 INFO telegramBot.bot Message sent to admin from user 1 (Nephilim)
+2025-12-23 12:17:47,719 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:50,762 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:53,844 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:56,902 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:17:59,955 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:03,094 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:06,485 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:08,350 INFO news.views Retrieved 0 news items
+2025-12-23 12:18:08,970 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:18:09,827 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:10,560 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:18:14,814 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:19,512 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:18:32,292 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:18:34,739 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:39,934 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:44,928 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:18:45,687 INFO news.views Retrieved 0 news items
+2025-12-23 12:18:47,034 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:18:54,405 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:00,295 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:02,839 INFO news.views News created: 1 by user 1
+2025-12-23 12:19:02,851 INFO news.views Retrieved 1 news items
+2025-12-23 12:19:04,359 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:13,356 INFO news.views Retrieved 1 news items
+2025-12-23 12:19:14,170 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:19:14,672 INFO news.views Retrieved 1 news items
+2025-12-23 12:19:17,511 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:23,756 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:26,775 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:30,054 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:34,046 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:37,065 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:19:52,970 ERROR asyncio Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7b6e94015160>
+2025-12-23 12:19:52,982 ERROR asyncio Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7b6e93fcb590>, 4497.161694885)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7b6e94014980>

@@ -324,10 +324,12 @@ const CryptoDashboard = () => {
         loadCryptocurrencies();
     }, []);
 
-    const filteredCrypto = cryptocurrencies.filter(coin =>
-        coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        coin.pair.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCrypto = cryptocurrencies
+        .filter(coin =>
+            coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            coin.pair.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     if (loading) {
         return (

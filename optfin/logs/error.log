@@ -324,3 +324,32 @@ client_session: <aiohttp.client.ClientSession object at 0x7909531d9160>
 2025-12-23 11:15:53,612 ERROR asyncio Unclosed connector
 connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x79095318ee70>, 673.520100896)])']
 connector: <aiohttp.connector.TCPConnector object at 0x7909531d8980>
+2025-12-23 12:06:28,913 ERROR registration.views Error message
+2025-12-23 12:06:28,965 ERROR news.views Error message
+2025-12-23 12:06:28,997 ERROR cryptocurrencies.views Error message
+2025-12-23 12:06:29,009 ERROR exchanges.views Error message
+2025-12-23 12:06:29,032 ERROR portfolios.views Error message
+2025-12-23 12:06:29,057 ERROR telegramChat.views Error message
+2025-12-23 12:10:01,922 ERROR registration.views Error message
+2025-12-23 12:10:01,938 ERROR news.views Error message
+2025-12-23 12:10:01,952 ERROR cryptocurrencies.views Error message
+2025-12-23 12:10:01,969 ERROR exchanges.views Error message
+2025-12-23 12:10:01,995 ERROR portfolios.views Error message
+2025-12-23 12:10:02,022 ERROR telegramChat.views Error message
+2025-12-23 12:16:50,039 ERROR registration.views Error message
+2025-12-23 12:16:50,058 ERROR news.views Error message
+2025-12-23 12:16:50,076 ERROR cryptocurrencies.views Error message
+2025-12-23 12:16:50,097 ERROR exchanges.views Error message
+2025-12-23 12:16:50,116 ERROR portfolios.views Error message
+2025-12-23 12:16:50,131 ERROR telegramChat.views Error message
+2025-12-23 12:17:26,408 ERROR registration.views Error message
+2025-12-23 12:17:26,421 ERROR news.views Error message
+2025-12-23 12:17:26,431 ERROR cryptocurrencies.views Error message
+2025-12-23 12:17:26,442 ERROR exchanges.views Error message
+2025-12-23 12:17:26,454 ERROR portfolios.views Error message
+2025-12-23 12:17:26,467 ERROR telegramChat.views Error message
+2025-12-23 12:19:52,970 ERROR asyncio Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7b6e94015160>
+2025-12-23 12:19:52,982 ERROR asyncio Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7b6e93fcb590>, 4497.161694885)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7b6e94014980>
