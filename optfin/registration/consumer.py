@@ -16,5 +16,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def chat_message(self, event):
-        message = event['message']
-        await self.send(text_data=json.dumps({"message": message}))
+        message = event.get('message', '')
+        from_user = event.get('from', 'admin')
+        await self.send(text_data=json.dumps({
+            "message": message,
+            "from": from_user
+        }))

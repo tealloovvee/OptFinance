@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { api, tokenStorage, type User, type Cryptocurrency, type NewsItem, type Exchange, type Portfolio } from './api';
@@ -1100,24 +1100,124 @@ const ChatWidget = ({ user }: { user: User | null }) => {
         },
     ]);
     const [draft, setDraft] = useState('');
+    const [ws, setWs] = useState<WebSocket | null>(null);
+    const [isConnecting, setIsConnecting] = useState(false);
+    const messageIdCounterRef = useRef(2);
+
+    // Get API URL - use same logic as api.ts
+    const API_BASE_URL = ((import.meta as any).env?.VITE_API_URL as string) || 'http://localhost:8000';
+    const WS_BASE_URL = API_BASE_URL.replace('http://', 'ws://').replace('https://', 'wss://');
+
+    useEffect(() => {
+        if (!user) return;
+
+        let websocket: WebSocket | null = null;
+        let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+        let shouldReconnect = true;
+
+        const connectWebSocket = () => {
+            if (!shouldReconnect) return;
+            
+            try {
+                const token = tokenStorage.getAccessToken();
+                if (!token) {
+                    console.error('No access token available');
+                    return;
+                }
+
+                const wsUrl = `${WS_BASE_URL}/ws/chat/?token=${token}`;
+                websocket = new WebSocket(wsUrl);
+                setIsConnecting(true);
+
+                websocket.onopen = () => {
+                    console.log('WebSocket connected');
+                    setIsConnecting(false);
+                    setWs(websocket);
+                };
+
+                websocket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        const messageText = data.message || '';
+                        const from = data.from || 'admin';
+                        
+                        if (messageText) {
+                            const newId = messageIdCounterRef.current;
+                            messageIdCounterRef.current += 1;
+                            setMessages((prev) => [
+                                ...prev,
+                                {
+                                    id: newId,
+                                    from: from as 'admin' | 'user',
+                                    text: messageText,
+                                    createdAt: new Date(),
+                                },
+                            ]);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error);
+                    }
+                };
+
+                websocket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    setIsConnecting(false);
+                };
+
+                websocket.onclose = () => {
+                    console.log('WebSocket disconnected');
+                    setIsConnecting(false);
+                    setWs(null);
+                    // Reconnect after 3 seconds if still should reconnect
+                    if (shouldReconnect) {
+                        reconnectTimeout = setTimeout(connectWebSocket, 3000);
+                    }
+                };
+            } catch (error) {
+                console.error('Error connecting WebSocket:', error);
+                setIsConnecting(false);
+                if (shouldReconnect) {
+                    reconnectTimeout = setTimeout(connectWebSocket, 3000);
+                }
+            }
+        };
+
+        connectWebSocket();
+
+        return () => {
+            shouldReconnect = false;
+            if (reconnectTimeout) {
+                clearTimeout(reconnectTimeout);
+            }
+            if (websocket) {
+                websocket.close();
+            }
+        };
+    }, [user, WS_BASE_URL]);
 
     const toggleChat = () => setIsOpen((prev) => !prev);
 
-    const handleSend = () => {
+    const handleSend = async () => {
         const text = draft.trim();
-        if (!text) return;
+        if (!text || !user) return;
 
-        setMessages((prev) => [
-            ...prev,
-            {
-                id: prev.length + 1,
-                from: 'user',
-                text,
-                createdAt: new Date(),
-            },
-        ]);
+        // Add message to UI immediately
+        const userMessage: ChatMessage = {
+            id: messageIdCounterRef.current,
+            from: 'user',
+            text,
+            createdAt: new Date(),
+        };
+        messageIdCounterRef.current += 1;
+        setMessages((prev) => [...prev, userMessage]);
         setDraft('');
-        // Here we could call API/WebSocket to send message to admin
+
+        // Send message to backend
+        try {
+            await api.sendChatMessage(text);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1144,7 +1244,9 @@ const ChatWidget = ({ user }: { user: User | null }) => {
                 <div className="chat-header">
                     <div>
                         <div className="chat-admin-name">Админ</div>
-                        <div className="chat-admin-status">Онлайн</div>
+                        <div className="chat-admin-status">
+                            {ws && ws.readyState === WebSocket.OPEN ? 'Онлайн' : isConnecting ? 'Подключение...' : 'Офлайн'}
+                        </div>
                     </div>
                     <button className="chat-close" aria-label="Закрыть чат" onClick={toggleChat}>
                         ×
