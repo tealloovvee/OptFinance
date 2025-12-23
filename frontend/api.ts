@@ -386,6 +386,13 @@ export const api = {
       body: JSON.stringify(data),
     });
   },
+
+  sendChatMessage: async (message: string): Promise<{ status: string }> => {
+    return apiRequest<{ status: string }>('/chat/send/', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  },
 };
 
 

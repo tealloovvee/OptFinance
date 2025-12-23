@@ -39,7 +39,8 @@ async def handle_admin_reply(message: types.Message):
                             f"user_{user_id}",
                             {
                                 "type": "chat.message",
-                                "message": reply_text
+                                "message": reply_text,
+                                "from": "admin"
                             }
                         )
                         logger.info(f"Message sent to user {user_id} via WebSocket")

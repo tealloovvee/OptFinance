@@ -181,3 +181,4 @@ export const getTranslation = (key: string, lang: Language): string => {
   return translations[lang][key as keyof typeof translations.ru] || key;
 };
 
+

@@ -295,3 +295,32 @@ LINE 1: ...user" ("role", "login", "email", "password_hash", "is_active...
 2025-12-20 16:55:29,515 ERROR exchanges.views Error message
 2025-12-20 16:55:29,543 ERROR portfolios.views Error message
 2025-12-20 16:55:29,563 ERROR telegramChat.views Error message
+2025-12-23 11:03:04,838 ERROR registration.views Error message
+2025-12-23 11:03:05,136 ERROR news.views Error message
+2025-12-23 11:03:05,412 ERROR cryptocurrencies.views Error message
+2025-12-23 11:03:05,674 ERROR exchanges.views Error message
+2025-12-23 11:03:05,893 ERROR portfolios.views Error message
+2025-12-23 11:03:06,121 ERROR telegramChat.views Error message
+2025-12-23 11:04:13,235 ERROR registration.views Error message
+2025-12-23 11:04:13,294 ERROR news.views Error message
+2025-12-23 11:04:13,336 ERROR cryptocurrencies.views Error message
+2025-12-23 11:04:13,401 ERROR exchanges.views Error message
+2025-12-23 11:04:13,436 ERROR portfolios.views Error message
+2025-12-23 11:04:13,476 ERROR telegramChat.views Error message
+2025-12-23 11:13:02,053 ERROR registration.views Error message
+2025-12-23 11:13:02,137 ERROR news.views Error message
+2025-12-23 11:13:02,206 ERROR cryptocurrencies.views Error message
+2025-12-23 11:13:02,262 ERROR exchanges.views Error message
+2025-12-23 11:13:02,280 ERROR portfolios.views Error message
+2025-12-23 11:13:02,336 ERROR telegramChat.views Error message
+2025-12-23 11:13:39,015 ERROR registration.views Error message
+2025-12-23 11:13:39,074 ERROR news.views Error message
+2025-12-23 11:13:39,147 ERROR cryptocurrencies.views Error message
+2025-12-23 11:13:39,219 ERROR exchanges.views Error message
+2025-12-23 11:13:39,287 ERROR portfolios.views Error message
+2025-12-23 11:13:39,353 ERROR telegramChat.views Error message
+2025-12-23 11:15:53,605 ERROR asyncio Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7909531d9160>
+2025-12-23 11:15:53,612 ERROR asyncio Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x79095318ee70>, 673.520100896)])']
+connector: <aiohttp.connector.TCPConnector object at 0x7909531d8980>
