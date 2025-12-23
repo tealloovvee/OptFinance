@@ -426,6 +426,26 @@ export const api = {
     });
   },
 
+  deleteNews: async (newsId: number): Promise<{ status: string; message: string }> => {
+    const accessToken = tokenStorage.getAccessToken();
+    const response = await fetch(`${API_BASE_URL}/news/${newsId}/`, {
+      method: 'DELETE',
+      headers: {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({
+        error: `HTTP ${response.status}: ${response.statusText}`,
+      }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+    return response.json();
+  },
+
   getPortfolios: async (): Promise<PortfoliosResponse> => {
     return apiRequest<PortfoliosResponse>('/portfolios/');
   },

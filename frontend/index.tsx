@@ -332,7 +332,7 @@ const CryptoDashboard = () => {
         )
         .sort((a, b) => {
             const dir = sortOrder === 'asc' ? 1 : -1;
-            return dir * a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+            return dir * (a.id - b.id);
         });
 
     if (loading) {
@@ -370,7 +370,7 @@ const CryptoDashboard = () => {
                     className="filter-button"
                     onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
                 >
-                    {t('sort')} ({sortOrder === 'asc' ? 'A→Z' : 'Z→A'})
+                    {t('sort')} ({sortOrder === 'asc' ? '1→9' : '9→1'})
                 </button>
                 <button className="filter-button">{t('popularity')}</button>
             </div>
@@ -518,6 +518,27 @@ const NewsDashboard = ({ user }: { user: User | null }) => {
             setEditPhoto(null);
         } catch (err) {
             console.error('Ошибка обновления новости:', err);
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
+    const handleDeleteNews = async () => {
+        if (!selectedNews) return;
+        if (!window.confirm('Вы уверены, что хотите удалить эту новость?')) return;
+        
+        setEditLoading(true);
+        try {
+            await api.deleteNews(selectedNews.id);
+            // refresh list and close modal
+            const response = await api.getNews();
+            setNews(response.news || []);
+            setSelectedNews(null);
+            setIsEditing(false);
+            setEditPhoto(null);
+        } catch (err) {
+            console.error('Ошибка удаления новости:', err);
+            alert('Ошибка при удалении новости');
         } finally {
             setEditLoading(false);
         }
@@ -728,6 +749,19 @@ const NewsDashboard = ({ user }: { user: User | null }) => {
                                     <div className="modal-actions">
                                         <button className="filter-button" onClick={() => setIsEditing(true)}>
                                             Редактировать
+                                        </button>
+                                        <button 
+                                            className="filter-button" 
+                                            onClick={handleDeleteNews}
+                                            disabled={editLoading}
+                                            style={{ 
+                                                background: '#dc2626', 
+                                                borderColor: '#dc2626', 
+                                                color: 'white',
+                                                fontWeight: 600
+                                            }}
+                                        >
+                                            {editLoading ? 'Удаление...' : 'Удалить'}
                                         </button>
                                     </div>
                                 )}
