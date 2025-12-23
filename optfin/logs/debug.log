@@ -1047,3 +1047,142 @@ client_session: <aiohttp.client.ClientSession object at 0x7b6e94015160>
 2025-12-23 12:19:52,982 ERROR asyncio Unclosed connector
 connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7b6e93fcb590>, 4497.161694885)])']
 connector: <aiohttp.connector.TCPConnector object at 0x7b6e94014980>
+2025-12-23 12:34:34,009 DEBUG registration.views Debug message
+2025-12-23 12:34:34,010 INFO registration.views Info message
+2025-12-23 12:34:34,010 ERROR registration.views Error message
+2025-12-23 12:34:34,028 DEBUG news.views Debug message
+2025-12-23 12:34:34,028 INFO news.views Info message
+2025-12-23 12:34:34,029 ERROR news.views Error message
+2025-12-23 12:34:34,045 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:34:34,045 INFO cryptocurrencies.views Info message
+2025-12-23 12:34:34,046 ERROR cryptocurrencies.views Error message
+2025-12-23 12:34:34,062 DEBUG exchanges.views Debug message
+2025-12-23 12:34:34,062 INFO exchanges.views Info message
+2025-12-23 12:34:34,063 ERROR exchanges.views Error message
+2025-12-23 12:34:34,078 DEBUG portfolios.views Debug message
+2025-12-23 12:34:34,078 INFO portfolios.views Info message
+2025-12-23 12:34:34,078 ERROR portfolios.views Error message
+2025-12-23 12:34:34,091 DEBUG telegramChat.views Debug message
+2025-12-23 12:34:34,091 INFO telegramChat.views Info message
+2025-12-23 12:34:34,092 ERROR telegramChat.views Error message
+2025-12-23 12:35:09,807 DEBUG registration.views Debug message
+2025-12-23 12:35:09,808 INFO registration.views Info message
+2025-12-23 12:35:09,809 ERROR registration.views Error message
+2025-12-23 12:35:09,835 DEBUG news.views Debug message
+2025-12-23 12:35:09,836 INFO news.views Info message
+2025-12-23 12:35:09,837 ERROR news.views Error message
+2025-12-23 12:35:09,857 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:35:09,858 INFO cryptocurrencies.views Info message
+2025-12-23 12:35:09,859 ERROR cryptocurrencies.views Error message
+2025-12-23 12:35:09,882 DEBUG exchanges.views Debug message
+2025-12-23 12:35:09,882 INFO exchanges.views Info message
+2025-12-23 12:35:09,883 ERROR exchanges.views Error message
+2025-12-23 12:35:09,906 DEBUG portfolios.views Debug message
+2025-12-23 12:35:09,906 INFO portfolios.views Info message
+2025-12-23 12:35:09,907 ERROR portfolios.views Error message
+2025-12-23 12:35:09,926 DEBUG telegramChat.views Debug message
+2025-12-23 12:35:09,926 INFO telegramChat.views Info message
+2025-12-23 12:35:09,927 ERROR telegramChat.views Error message
+2025-12-23 12:35:09,970 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:09,987 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:35:12,997 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:16,010 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:19,039 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:22,056 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:23,025 INFO news.views Retrieved 1 news items
+2025-12-23 12:35:25,076 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:28,110 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:31,143 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:33,261 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:35:33,743 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:35:34,144 INFO news.views Retrieved 1 news items
+2025-12-23 12:35:34,177 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:34,501 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:35:37,206 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:40,279 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:43,444 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:46,749 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:50,298 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:53,876 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:35:54,151 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:35:58,373 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:36:03,139 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:36:10,623 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:04,447 DEBUG registration.views Debug message
+2025-12-23 12:41:04,447 INFO registration.views Info message
+2025-12-23 12:41:04,448 ERROR registration.views Error message
+2025-12-23 12:41:04,463 DEBUG news.views Debug message
+2025-12-23 12:41:04,464 INFO news.views Info message
+2025-12-23 12:41:04,464 ERROR news.views Error message
+2025-12-23 12:41:04,477 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:41:04,478 INFO cryptocurrencies.views Info message
+2025-12-23 12:41:04,478 ERROR cryptocurrencies.views Error message
+2025-12-23 12:41:04,493 DEBUG exchanges.views Debug message
+2025-12-23 12:41:04,493 INFO exchanges.views Info message
+2025-12-23 12:41:04,494 ERROR exchanges.views Error message
+2025-12-23 12:41:04,509 DEBUG portfolios.views Debug message
+2025-12-23 12:41:04,509 INFO portfolios.views Info message
+2025-12-23 12:41:04,510 ERROR portfolios.views Error message
+2025-12-23 12:41:04,523 DEBUG telegramChat.views Debug message
+2025-12-23 12:41:04,523 INFO telegramChat.views Info message
+2025-12-23 12:41:04,523 ERROR telegramChat.views Error message
+2025-12-23 12:41:22,884 DEBUG registration.views Debug message
+2025-12-23 12:41:22,885 INFO registration.views Info message
+2025-12-23 12:41:22,886 ERROR registration.views Error message
+2025-12-23 12:41:22,916 DEBUG news.views Debug message
+2025-12-23 12:41:22,917 INFO news.views Info message
+2025-12-23 12:41:22,918 ERROR news.views Error message
+2025-12-23 12:41:22,943 DEBUG cryptocurrencies.views Debug message
+2025-12-23 12:41:22,944 INFO cryptocurrencies.views Info message
+2025-12-23 12:41:22,945 ERROR cryptocurrencies.views Error message
+2025-12-23 12:41:22,971 DEBUG exchanges.views Debug message
+2025-12-23 12:41:22,972 INFO exchanges.views Info message
+2025-12-23 12:41:22,973 ERROR exchanges.views Error message
+2025-12-23 12:41:22,997 DEBUG portfolios.views Debug message
+2025-12-23 12:41:22,998 INFO portfolios.views Info message
+2025-12-23 12:41:22,998 ERROR portfolios.views Error message
+2025-12-23 12:41:23,019 DEBUG telegramChat.views Debug message
+2025-12-23 12:41:23,019 INFO telegramChat.views Info message
+2025-12-23 12:41:23,020 ERROR telegramChat.views Error message
+2025-12-23 12:41:23,058 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:23,069 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:41:26,079 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:29,102 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:29,608 INFO news.views Retrieved 1 news items
+2025-12-23 12:41:32,120 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:35,031 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:41:35,141 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:35,582 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:41:36,117 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:41:36,636 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:41:37,326 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:41:37,976 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:41:38,158 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:39,548 INFO cryptocurrencies.views Retrieved 30 cryptocurrencies
+2025-12-23 12:41:41,188 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:44,224 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:47,260 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:50,302 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:53,355 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:56,425 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:41:59,731 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:03,040 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:07,184 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:11,197 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:15,788 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:22,402 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:27,171 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:29,362 INFO news.views Retrieved 1 news items
+2025-12-23 12:42:30,911 INFO exchanges.views Retrieved 0 exchanges
+2025-12-23 12:42:32,596 INFO portfolios.views Retrieved 0 portfolios for user 1
+2025-12-23 12:42:33,527 INFO news.views Retrieved 1 news items
+2025-12-23 12:42:33,551 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:42,013 INFO news.views Retrieved 1 news items
+2025-12-23 12:42:45,948 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:51,489 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:55,775 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:42:59,950 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:43:05,400 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:43:10,904 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:43:17,040 WARNING django.request Not Found: /ws/chat/
+2025-12-23 12:43:23,693 WARNING django.request Not Found: /ws/chat/

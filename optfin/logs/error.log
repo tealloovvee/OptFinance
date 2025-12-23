@@ -353,3 +353,27 @@ client_session: <aiohttp.client.ClientSession object at 0x7b6e94015160>
 2025-12-23 12:19:52,982 ERROR asyncio Unclosed connector
 connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x7b6e93fcb590>, 4497.161694885)])']
 connector: <aiohttp.connector.TCPConnector object at 0x7b6e94014980>
+2025-12-23 12:34:34,010 ERROR registration.views Error message
+2025-12-23 12:34:34,029 ERROR news.views Error message
+2025-12-23 12:34:34,046 ERROR cryptocurrencies.views Error message
+2025-12-23 12:34:34,063 ERROR exchanges.views Error message
+2025-12-23 12:34:34,078 ERROR portfolios.views Error message
+2025-12-23 12:34:34,092 ERROR telegramChat.views Error message
+2025-12-23 12:35:09,809 ERROR registration.views Error message
+2025-12-23 12:35:09,837 ERROR news.views Error message
+2025-12-23 12:35:09,859 ERROR cryptocurrencies.views Error message
+2025-12-23 12:35:09,883 ERROR exchanges.views Error message
+2025-12-23 12:35:09,907 ERROR portfolios.views Error message
+2025-12-23 12:35:09,927 ERROR telegramChat.views Error message
+2025-12-23 12:41:04,448 ERROR registration.views Error message
+2025-12-23 12:41:04,464 ERROR news.views Error message
+2025-12-23 12:41:04,478 ERROR cryptocurrencies.views Error message
+2025-12-23 12:41:04,494 ERROR exchanges.views Error message
+2025-12-23 12:41:04,510 ERROR portfolios.views Error message
+2025-12-23 12:41:04,523 ERROR telegramChat.views Error message
+2025-12-23 12:41:22,886 ERROR registration.views Error message
+2025-12-23 12:41:22,918 ERROR news.views Error message
+2025-12-23 12:41:22,945 ERROR cryptocurrencies.views Error message
+2025-12-23 12:41:22,973 ERROR exchanges.views Error message
+2025-12-23 12:41:22,998 ERROR portfolios.views Error message
+2025-12-23 12:41:23,020 ERROR telegramChat.views Error message
