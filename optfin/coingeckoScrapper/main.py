@@ -12,11 +12,14 @@ django.setup()
 
 from modelsMark.models import OHLCV
 from cryptocurrencies.models import CryptoCoin
+from exchanges.models import Exchange
 
 API_KEY = "CG-tpMDjB6SNKH7F3QWuRpsUrXY"
 COINGECKO_API_OHLC = "https://api.coingecko.com/api/v3/coins/{coin_id}/ohlc"
 COINGECKO_API_MARKET_CHART = "https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart"
 COINGECKO_API_COINS_LIST = "https://api.coingecko.com/api/v3/coins/markets"
+COINGECKO_API_EXCHANGES = "https://api.coingecko.com/api/v3/exchanges"
+COINGECKO_API_EXCHANGE_DETAIL = "https://api.coingecko.com/api/v3/exchanges/{exchange_id}"
 
 HEADERS = {
     "accept": "application/json",
@@ -134,8 +137,126 @@ def save_ohlcv(coin: CryptoCoin, ohlcv_data: list, interval: str):
     print(f"Saved {len(ohlcv_data)} candles for {coin.pair}")
 
 
+@rate_limiter(10)
+def get_btc_price():
+    """Получает актуальный курс BTC к USD"""
+    try:
+        response = requests.get(
+            "https://api.coingecko.com/api/v3/simple/price",
+            params={"ids": "bitcoin", "vs_currencies": "usd"},
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("bitcoin", {}).get("usd", 60000)
+        return 60000
+    except:
+        return 60000
+
+
+@rate_limiter(10)
+def get_exchange_details(exchange_id):
+    """Получает детальную информацию о бирже"""
+    try:
+        response = requests.get(
+            COINGECKO_API_EXCHANGE_DETAIL.format(exchange_id=exchange_id),
+            headers=HEADERS
+        )
+        if response.status_code == 200:
+            return response.json()
+        return None
+    except Exception as e:
+        print(f"Error fetching details for {exchange_id}: {e}")
+        return None
+
+
+@rate_limiter(10)
+def fill_exchanges_table_if_empty(limit=50):
+    """Заполняет таблицу бирж, если она пуста"""
+    if Exchange.objects.exists():
+        print("exchanges table is already filled")
+        return
+
+    btc_price = get_btc_price()
+    print(f"BTC price: ${btc_price:,.2f}")
+
+    params = {
+        "per_page": limit,
+        "page": 1
+    }
+
+    response = requests.get(COINGECKO_API_EXCHANGES, params=params, headers=HEADERS)
+    if response.status_code != 200:
+        print(f"request error CoinGecko exchanges list: {response.status_code}")
+        print(f"response text: {response.text}")
+        return
+
+    exchanges_list = response.json()
+    print(f"Received {len(exchanges_list)} exchanges from API")
+
+    saved_count = 0
+    for exchange_data in exchanges_list:
+        try:
+            exchange_id = exchange_data.get("id", "")
+            name = exchange_data.get("name", "")
+
+            trading_volume_24h_btc = exchange_data.get("trade_volume_24h_btc", 0)
+            trading_volume_24h_btc_normalized = exchange_data.get("trade_volume_24h_btc_normalized", 0)
+
+            volume_btc = float(trading_volume_24h_btc_normalized or trading_volume_24h_btc or 0)
+            trading_volume_usd = volume_btc * btc_price
+
+            detail_data = get_exchange_details(exchange_id)
+            
+            coins_listed = 0
+            rating = 0
+            
+            if detail_data:
+
+                tickers = detail_data.get("tickers", [])
+                if tickers:
+                    unique_coins = set()
+                    for ticker in tickers:
+                        base = ticker.get("base", "")
+                        if base:
+                            unique_coins.add(base.upper())
+                    coins_listed = len(unique_coins)
+
+                trust_score = detail_data.get("trust_score", None)
+                if trust_score is not None:
+                    try:
+                        rating = float(trust_score)
+                    except (ValueError, TypeError):
+                        rating = 0
+                else:
+                    rating = 0
+            else:
+                print(f"Warning: Could not get details for {name}")
+
+            if name:
+                Exchange.objects.create(
+                    name=name,
+                    trading_volume=trading_volume_usd,
+                    coins_listed=coins_listed,
+                    rating=rating
+                )
+                saved_count += 1
+                print(f"added exchange: {name} (volume: ${trading_volume_usd:,.2f}, coins: {coins_listed}, rating: {rating:.2f})")
+            else:
+                print(f"Warning: Skipping exchange with no name (id: {exchange_id})")
+            
+        except Exception as e:
+            print(f"Error processing exchange {exchange_data.get('name', 'unknown')}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
+
+    print(f"successfully added {saved_count} exchanges")
+
+
 def main():
     fill_crypto_table_if_empty()
+    fill_exchanges_table_if_empty()
 
     coins = CryptoCoin.objects.all()
     print(f"Loading OHLCV for {coins.count()} coins")

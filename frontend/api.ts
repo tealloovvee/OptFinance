@@ -87,7 +87,6 @@ export interface CreateNewsData {
   title: string;
   content: string;
   photo?: string;
-  photo_file?: File;
   published_at?: string;
 }
 
@@ -360,33 +359,6 @@ export const api = {
   },
 
   createNews: async (data: CreateNewsData): Promise<SingleNewsResponse> => {
-    // If there is a file - send multipart
-    if (data.photo_file) {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('content', data.content);
-      if (data.photo_file) formData.append('photo', data.photo_file);
-      if (data.published_at) formData.append('published_at', data.published_at);
-
-      const accessToken = tokenStorage.getAccessToken();
-      const response = await fetch(`${API_BASE_URL}/news/`, {
-        method: 'POST',
-        headers: {
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const error: ApiError = await response.json().catch(() => ({
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        }));
-        throw new Error(error.error || `HTTP ${response.status}`);
-      }
-      return response.json();
-    }
-
     return apiRequest<SingleNewsResponse>('/news/', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -394,56 +366,10 @@ export const api = {
   },
 
   updateNews: async (newsId: number, data: Partial<CreateNewsData>): Promise<SingleNewsResponse> => {
-    if (data.photo_file) {
-      const formData = new FormData();
-      if (data.title !== undefined) formData.append('title', data.title);
-      if (data.content !== undefined) formData.append('content', data.content);
-      if (data.photo_file) formData.append('photo', data.photo_file);
-      if (data.published_at) formData.append('published_at', data.published_at);
-
-      const accessToken = tokenStorage.getAccessToken();
-      const response = await fetch(`${API_BASE_URL}/news/${newsId}/`, {
-        method: 'PUT',
-        headers: {
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        const error: ApiError = await response.json().catch(() => ({
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        }));
-        throw new Error(error.error || `HTTP ${response.status}`);
-      }
-      return response.json();
-    }
-
     return apiRequest<SingleNewsResponse>(`/news/${newsId}/`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-  },
-
-  deleteNews: async (newsId: number): Promise<{ status: string; message: string }> => {
-    const accessToken = tokenStorage.getAccessToken();
-    const response = await fetch(`${API_BASE_URL}/news/${newsId}/`, {
-      method: 'DELETE',
-      headers: {
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error: ApiError = await response.json().catch(() => ({
-        error: `HTTP ${response.status}: ${response.statusText}`,
-      }));
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    return response.json();
   },
 
   getPortfolios: async (): Promise<PortfoliosResponse> => {
@@ -458,13 +384,6 @@ export const api = {
     return apiRequest<Portfolio>('/portfolios/create/', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
-  },
-
-  sendChatMessage: async (message: string): Promise<{ status: string }> => {
-    return apiRequest<{ status: string }>('/chat/send/', {
-      method: 'POST',
-      body: JSON.stringify({ message }),
     });
   },
 };

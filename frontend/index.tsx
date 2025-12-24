@@ -986,19 +986,30 @@ const ExchangesDashboard = () => {
                                 </td>
                             </tr>
                         ) : (
-                            filteredExchanges.map((exchange) => (
-                                <tr key={exchange.id}>
-                                    <td>{exchange.id}</td>
-                                    <td>
-                                        <div className="crypto-name">
-                                            <span>{exchange.name}</span>
-                                        </div>
-                                    </td>
-                                    <td>{exchange.trading_volume}</td>
-                                    <td>{exchange.coins_listed}</td>
-                                    <td>{exchange.rating}</td>
-                                </tr>
-                            ))
+                            filteredExchanges.map((exchange) => {
+                                const volume = parseFloat(exchange.trading_volume);
+                                const formattedVolume = volume >= 1e9 
+                                    ? `$${(volume / 1e9).toFixed(2)}B`
+                                    : volume >= 1e6 
+                                    ? `$${(volume / 1e6).toFixed(2)}M`
+                                    : volume >= 1e3
+                                    ? `$${(volume / 1e3).toFixed(2)}K`
+                                    : `$${volume.toFixed(2)}`;
+                                
+                                return (
+                                    <tr key={exchange.id}>
+                                        <td>{exchange.id}</td>
+                                        <td>
+                                            <div className="crypto-name">
+                                                <span>{exchange.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>{formattedVolume}</td>
+                                        <td>{exchange.coins_listed.toLocaleString()}</td>
+                                        <td>{parseFloat(exchange.rating).toFixed(2)}</td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
