@@ -2,3 +2,5 @@ optfin/logs/*
 
 .env
 .env.docker
+DEPLOYMENT_VPN.md
+QUICK_START_VPN.md

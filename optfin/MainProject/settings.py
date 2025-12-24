@@ -29,9 +29,14 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
+# ALLOWED_HOSTS - добавьте IP адреса из Radmin VPN
+# Пример: если ваш IP в Radmin VPN 26.26.26.1, добавьте "26.26.26.1"
 ALLOWED_HOSTS = [
     "localhost",
+    "127.0.0.1",
     "192.168.100.7",
+    # Добавьте сюда IP адрес вашей машины в Radmin VPN
+    # Например: "26.26.26.1"
 ]
 
 TELEGRAM_BOT_TOKEN = env('TELEGRAM_BOT_TOKEN', default="8473377966:AAGijMvNrGqG4JjquwvnwKkbS3Kvx5m_ysw")
@@ -228,6 +233,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+# CORS настройки - добавьте IP адреса машин из Radmin VPN
+# Пример: если фронтенд на 26.26.26.2, добавьте "http://26.26.26.2:3000"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React dev server
     "http://127.0.0.1:3000",
@@ -235,8 +242,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://192.168.100.7:3000",  # Для доступа по локальной сети
     "http://192.168.100.7:5173",
+    # Добавьте сюда IP адреса машин из Radmin VPN
+    # Например: "http://26.26.26.2:3000" (IP фронтенд машины)
 ]
-CORS_ALLOW_ALL_ORIGINS = True
+
+# Для разработки можно использовать CORS_ALLOW_ALL_ORIGINS = True
+# Но для production лучше указать конкретные адреса выше
+CORS_ALLOW_ALL_ORIGINS = True  # Измените на False в production и укажите конкретные адреса
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
